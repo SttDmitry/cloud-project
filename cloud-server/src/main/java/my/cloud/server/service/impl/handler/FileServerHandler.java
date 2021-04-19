@@ -1,6 +1,5 @@
 package my.cloud.server.service.impl.handler;
 
-import com.sun.xml.internal.ws.api.model.wsdl.WSDLOutput;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.DefaultFileRegion;
@@ -10,34 +9,17 @@ import io.netty.handler.stream.ChunkedFile;
 
 import java.io.File;
 import java.io.RandomAccessFile;
-import java.util.prefs.Preferences;
 
 public class FileServerHandler extends SimpleChannelInboundHandler<String> {
 
     private File cloudDir = new File(System.getenv("LOCALAPPDATA")+"//CloudProject");
 
     @Override
-    public void channelActive(ChannelHandlerContext ctx) {
-        StringBuilder sb = new StringBuilder();
-        if (!cloudDir.exists()) {
-            cloudDir.mkdirs();
-        } else {
-            for (File childFile : cloudDir.listFiles()) {
-                if (childFile.isFile()){
-                    sb.append(childFile.getName()).append(", ");
-                }
-            }
-        }
-        sb.setLength(sb.length()-2);
-        ctx.writeAndFlush(sb.toString());
-    }
-
-    @Override
     public void channelRead0(ChannelHandlerContext ctx, String msg) throws Exception {
         RandomAccessFile raf = null;
         long length = -1;
         try {
-            raf = new RandomAccessFile(msg, "r");
+            raf = new RandomAccessFile(cloudDir+"//"+msg, "r");
             length = raf.length();
         } catch (Exception e) {
             ctx.writeAndFlush("ERR: " + e.getClass().getSimpleName() + ": " + e.getMessage() + '\n');

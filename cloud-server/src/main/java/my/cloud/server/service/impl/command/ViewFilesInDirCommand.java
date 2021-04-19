@@ -5,6 +5,9 @@ import my.cloud.server.service.CommandService;
 import java.io.File;
 
 public class ViewFilesInDirCommand implements CommandService {
+
+    private File cloudDir = new File(System.getenv("LOCALAPPDATA")+"//CloudProject");
+
     @Override
     public String processCommand(String command) {
         final int requirementCountCommandParts = 2;
@@ -18,24 +21,21 @@ public class ViewFilesInDirCommand implements CommandService {
     }
 
     private String process(String dirPath) {
-        File directory = new File(dirPath);
-
-        if (!directory.exists()) {
-            return "Directory is not exists";
+        StringBuilder sb = new StringBuilder();
+        if (!cloudDir.exists()) {
+            cloudDir.mkdirs();
+        } else {
+            for (File childFile : cloudDir.listFiles()) {
+                if (childFile.isFile()){
+                    sb.append(childFile.getName()).append(", ");
+                }
+            }
         }
+        sb.setLength(sb.length()-2);
 
-        StringBuilder builder = new StringBuilder();
-        for (File childFile : directory.listFiles()) {
-            String typeFile = getTypeFile(childFile);
-            builder.append(childFile.getName()).append(" | ").append(typeFile).append(System.lineSeparator());
-        }
-
-        return builder.toString();
+        return sb.toString();
     }
 
-    private String getTypeFile(File childFile) {
-        return childFile.isDirectory() ? "DIR" : "FILE";
-    }
 
     @Override
     public String getCommand() {

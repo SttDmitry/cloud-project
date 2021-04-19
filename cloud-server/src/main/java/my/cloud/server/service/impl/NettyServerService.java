@@ -59,8 +59,9 @@ public class NettyServerService implements ServerService {
                                     new StringEncoder(CharsetUtil.UTF_8),
                                     new LineBasedFrameDecoder(8192),
                                     new StringDecoder(CharsetUtil.UTF_8),
-                                    new ChunkedWriteHandler(),
-                                    new FileServerHandler());
+                                    new CommandInboundHandler());
+//                                    new ChunkedWriteHandler(),
+//                                    new FileServerHandler());
 
                         }
                     });
