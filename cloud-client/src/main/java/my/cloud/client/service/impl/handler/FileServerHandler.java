@@ -1,4 +1,4 @@
-package my.cloud.server.service.impl.handler;
+package my.cloud.client.service.impl.handler;
 
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
@@ -31,14 +31,15 @@ public class FileServerHandler extends SimpleChannelInboundHandler<String> {
             }
         }
 
-        System.out.println("OK: " + raf.length() + '\n');
+        ctx.write("OK: " + raf.length() + '\n');
         if (ctx.pipeline().get(SslHandler.class) == null) {
             // SSL not enabled - can use zero-copy file transfer.
-            ctx.writeAndFlush(new DefaultFileRegion(raf.getChannel(), 0, length));
+            ctx.write(new DefaultFileRegion(raf.getChannel(), 0, length));
         } else {
             // SSL enabled - cannot use zero-copy file transfer.
-            ctx.writeAndFlush(new ChunkedFile(raf));
+            ctx.write(new ChunkedFile(raf));
         }
+        ctx.writeAndFlush("\n");
     }
 
     @Override

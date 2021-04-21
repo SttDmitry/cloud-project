@@ -1,10 +1,10 @@
 package my.cloud.client.service;
 
+import io.netty.channel.socket.SocketChannel;
+
 public interface NetworkService {
 
-    void sendCommand(String command);
+    void start();
 
-    int readCommandResult(byte[] buffer);
-
-    void closeConnection();
+    SocketChannel getChannel();
 }

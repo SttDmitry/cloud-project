@@ -9,6 +9,9 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.LineBasedFrameDecoder;
+import io.netty.handler.codec.serialization.ClassResolvers;
+import io.netty.handler.codec.serialization.ObjectDecoder;
+import io.netty.handler.codec.serialization.ObjectEncoder;
 import io.netty.handler.codec.string.StringDecoder;
 import io.netty.handler.codec.string.StringEncoder;
 import io.netty.handler.logging.LogLevel;
@@ -24,21 +27,10 @@ import my.cloud.server.service.impl.handler.FileServerHandler;
 
 public class NettyServerService implements ServerService {
 
-    static final boolean SSL = System.getProperty("ssl") != null;
-
     static final int PORT = 8189;
 
     @Override
     public void startServer() throws Exception {
-
-        final SslContext sslCtx;
-        if (SSL) {
-            SelfSignedCertificate ssc = new SelfSignedCertificate();
-            sslCtx = SslContextBuilder.forServer(ssc.certificate(), ssc.privateKey()).build();
-        } else {
-            sslCtx = null;
-        }
-
 
         EventLoopGroup bossGroup = new NioEventLoopGroup(1);
         EventLoopGroup workerGroup = new NioEventLoopGroup();
@@ -52,15 +44,11 @@ public class NettyServerService implements ServerService {
                     .childHandler(new ChannelInitializer<SocketChannel>() {
                         @Override
                         protected void initChannel(SocketChannel channel) {
-                            if (sslCtx != null) {
-                                channel.pipeline().addLast(sslCtx.newHandler(channel.alloc()));
-                            }
                             channel.pipeline().addLast(
-                                    new StringEncoder(CharsetUtil.UTF_8),
-                                    new LineBasedFrameDecoder(8192),
-                                    new StringDecoder(CharsetUtil.UTF_8),
-                                    new ChunkedWriteHandler(),
-                                    new FileServerHandler());
+                                    new ObjectEncoder(),
+                                    new ObjectDecoder(ClassResolvers.cacheDisabled(null)),
+                                    new CommandInboundHandler()
+                            );
 
                         }
                     });

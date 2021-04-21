@@ -18,7 +18,7 @@
       <ListView fx:id="cloudFilesList" editable="true" layoutX="325.0" layoutY="48.0" onMouseClicked="#cloudClick" prefHeight="307.0" prefWidth="265.0" AnchorPane.rightAnchor="10.0" />
       <Button fx:id="uplButton" layoutX="108.0" layoutY="361.0" mnemonicParsing="false" onAction="#uploadFile" text="Upload" />
       <Button fx:id="downButton" layoutX="422.0" layoutY="361.0" mnemonicParsing="false" onAction="#downloadFile" text="Download" />
-      <Button disable="true" layoutX="275.0" layoutY="330.0" mnemonicParsing="false" onAction="#deleteFile" text="Delete" visible="false" />
-      <Button disable="true" layoutX="262.0" layoutY="361.0" mnemonicParsing="false" onAction="#createNewFolder" text="New Folder" visible="false" />
+      <Button disable="true" layoutX="275.0" layoutY="330.0" mnemonicParsing="false" text="Delete" visible="false" />
+      <Button disable="true" layoutX="262.0" layoutY="361.0" mnemonicParsing="false" text="New Folder" visible="false" />
    </children>
 </AnchorPane>

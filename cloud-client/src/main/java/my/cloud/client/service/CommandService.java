@@ -1,4 +1,4 @@
-package my.cloud.server.service;
+package my.cloud.client.service;
 
 import io.netty.channel.Channel;
 

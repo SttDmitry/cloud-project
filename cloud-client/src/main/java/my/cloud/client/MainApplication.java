@@ -16,8 +16,8 @@ public class MainApplication extends Application {
         Parent parent = loader.load();
         primaryStage.setScene(new Scene(parent));
         primaryStage.setTitle("Cloud project");
-        MainController controller = loader.getController();
-        primaryStage.setOnCloseRequest((event) -> controller.shutdown());
+//        MainController controller = loader.getController();
+//        primaryStage.setOnCloseRequest((event) -> controller.shutdown());
         primaryStage.show();
     }
 }

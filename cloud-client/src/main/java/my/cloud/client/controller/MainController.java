@@ -1,5 +1,11 @@
 package my.cloud.client.controller;
 
+import io.netty.buffer.ByteBuf;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
+import io.netty.handler.stream.ChunkedFile;
+import io.netty.handler.stream.ChunkedWriteHandler;
+import io.netty.util.CharsetUtil;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.Initializable;
@@ -9,9 +15,13 @@ import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
 import my.cloud.client.factory.Factory;
 import my.cloud.client.service.NetworkService;
+import my.cloud.client.service.impl.handler.CommandInboundHandler;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.ResourceBundle;
 
 public class MainController implements Initializable {
@@ -27,34 +37,41 @@ public class MainController implements Initializable {
 
     public NetworkService networkService;
 
+    private Map<String, File> localFiles = new HashMap<>();
+
+
 
 
     public void uploadFile(ActionEvent actionEvent) {
-        //
         if(!localFilesList.getItems().isEmpty() && !(localFilesList.getSelectionModel().getSelectedItem() == null)) {
-//            String temp = localFilesList.getSelectionModel().getSelectedItem();
-//            cloudFilesList.getItems().addAll(temp);
-            networkService.sendCommand(localDir+"/"+localFilesList.getSelectionModel().getSelectedItem());
+            try {
+                System.out.println(localFiles.get(localFilesList.getSelectionModel().getSelectedItem()));
+                networkService.getChannel().writeAndFlush("upload "+localFiles.get(localFilesList.getSelectionModel().getSelectedItem()).getTotalSpace()+" "+localFilesList.getSelectionModel().getSelectedItem());
+                networkService.getChannel().pipeline().remove(CommandInboundHandler.class);
+                networkService.getChannel().pipeline().addLast(new ChunkedWriteHandler());
+                ChannelFuture future = networkService.getChannel().writeAndFlush(new ChunkedFile(localFiles.get(localFilesList.getSelectionModel().getSelectedItem())));
+                //stage.hideAll + show wait
+                future.addListener((ChannelFutureListener) channelFuture -> System.out.println("Finish write"));
+                networkService.getChannel().pipeline().addLast(new CommandInboundHandler());
+                networkService.getChannel().pipeline().remove(ChunkedWriteHandler.class);
+                // stage.showAll + close wait
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
 
     }
 
     public void downloadFile(ActionEvent actionEvent) {
-        //networkService.sendCommand(commandTextField.getText().trim());
         if(!cloudFilesList.getItems().isEmpty() && !(cloudFilesList.getSelectionModel().getSelectedItem() == null)) {
-//        String temp = cloudFilesList.getSelectionModel().getSelectedItem();
-//        localFilesList.getItems().addAll(temp);
+            try {
+                networkService.getChannel().writeAndFlush(new ChunkedFile(new File(localDir+"//"+localFilesList.getSelectionModel().getSelectedItem())));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
-
-    public void deleteFile(ActionEvent actionEvent) {
-//        if (localFilesList.getSelectionModel().getSelectedItems().size()>0) {
-//            localFilesList.getItems().removeAll(localFilesList.getSelectionModel().getSelectedItem());
-//        }  else if (cloudFilesList.getSelectionModel().getSelectedItems().size()>0) {
-//            cloudFilesList.getItems().removeAll(cloudFilesList.getSelectionModel().getSelectedItem());
-//        }
-    }
 
     public void localClick(MouseEvent mouseEvent) {
         downButton.setDisable(true);
@@ -68,35 +85,47 @@ public class MainController implements Initializable {
         localFilesList.getSelectionModel().select(-1);
     }
 
-    public void createNewFolder(ActionEvent actionEvent) {
-        //Создание новой папки на облаке
-    }
-
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         networkService = Factory.getNetworkService();
+        networkService.start();
 
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        System.out.println(networkService.getChannel());
         downButton.setDisable(true);
         uplButton.setDisable(true);
         refreshFilesLists();
         cloudPath.setText(cloudDir.getName());
         localPath.setText(localDir.getName());
-
-
-        createCommandResultHandler();
+//        createCommandResultHandler();
     }
 
     private void createCommandResultHandler() {
+
         new Thread(() -> {
-            byte[] buffer = new byte[1024];
-            while (true) {
-                int countReadBytes = networkService.readCommandResult(buffer);
-                String resultCommand = new String(buffer, 0, countReadBytes);
+            int x=0;
+            while (x!=1) {
+                ByteBuf bb = networkService.getChannel().alloc().buffer();
+                int countReadBytes = bb.readableBytes();
+                System.out.println(countReadBytes);
+                byte[] buffer = new byte[bb.readableBytes()];
+
+//                bb.readBytes(buffer);
+
+//                String resultCommand = new String(buffer, 0, countReadBytes);
+                System.out.println("BB: "+bb.toString(CharsetUtil.UTF_8));
+                String resultCommand = bb.toString(CharsetUtil.UTF_8);
+
                 String[] listOfFiles = resultCommand.split(", ");
                 Platform.runLater(() -> cloudFilesList.getItems().clear());
                 Platform.runLater(() -> cloudFilesList.getItems().addAll(listOfFiles));
-            }
-        }).start();
+                bb.release();
+                x++;
+            }}).start();
     }
 
     private void refreshFilesLists(){
@@ -109,14 +138,15 @@ public class MainController implements Initializable {
 //                }
 //            }
 //        }
+        networkService.getChannel().writeAndFlush("ls .");
         for (File childFile : localDir.listFiles()) {
             if (childFile.isFile()){
+                localFiles.put(childFile.getName(), childFile);
                 localFilesList.getItems().add(childFile.getName());
             }
         }
+//        createCommandResultHandler();
     }
 
-    public void shutdown() {
-        networkService.closeConnection();
-    }
+
 }

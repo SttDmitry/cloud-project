@@ -1,11 +1,13 @@
 package my.cloud.server.service.impl.command;
 
 import io.netty.channel.Channel;
+import io.netty.handler.stream.ChunkedWriteHandler;
 import my.cloud.server.service.CommandService;
+import my.cloud.server.service.impl.handler.FileServerHandler;
 
 import java.io.File;
 
-public class ViewFilesInDirCommand implements CommandService {
+public class DownloadFileCommand implements CommandService {
 
     private File cloudDir = new File(System.getenv("LOCALAPPDATA")+"//CloudProject");
 
@@ -17,29 +19,13 @@ public class ViewFilesInDirCommand implements CommandService {
         if (actualCommandParts.length != requirementCountCommandParts) {
             throw new IllegalArgumentException("Command \"" + getCommand() + "\" is not correct");
         }
+        channel.pipeline().addLast(new ChunkedWriteHandler());
 
-        return process(actualCommandParts[1]);
+        return actualCommandParts[1];
     }
-
-    private String process(String dirPath) {
-        StringBuilder sb = new StringBuilder("");
-        if (!cloudDir.exists()) {
-            cloudDir.mkdirs();
-        } else {
-            for (File childFile : cloudDir.listFiles()) {
-                if (childFile.isFile()){
-                    sb.append(childFile.getName()).append(", ");
-                }
-            }
-        }
-        sb.setLength(sb.length()-2);
-
-        return "ls "+sb.toString();
-    }
-
 
     @Override
     public String getCommand() {
-        return "ls";
+        return "download";
     }
 }
