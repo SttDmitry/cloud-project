@@ -1,9 +1,9 @@
-package my.cloud.server.service.impl;
+package my.cloud.client.service.impl;
 
 import io.netty.channel.Channel;
-import my.cloud.server.Factory.Factory;
-import my.cloud.server.service.CommandDictionaryService;
-import my.cloud.server.service.CommandService;
+import my.cloud.client.factory.Factory;
+import my.cloud.client.service.CommandDictionaryService;
+import my.cloud.client.service.CommandService;
 
 import java.util.Collections;
 import java.util.HashMap;

@@ -1,15 +1,15 @@
-package my.cloud.server.service.impl.command;
+package my.cloud.client.service.impl.command;
 
 import io.netty.channel.Channel;
 import io.netty.handler.stream.ChunkedWriteHandler;
-import my.cloud.server.service.CommandService;
-import my.cloud.server.service.impl.handler.FileServerHandler;
+import my.cloud.client.service.CommandService;
+import my.cloud.client.service.impl.handler.FileServerHandler;
 
 import java.io.File;
 
-public class DownloadFileCommand implements CommandService {
+public class UploadFileCommand implements CommandService {
 
-    private File cloudDir = new File(System.getenv("LOCALAPPDATA")+"//CloudProject");
+    private File localDir = new File(".");
 
     @Override
     public String processCommand(String command, Channel channel) {
@@ -19,13 +19,13 @@ public class DownloadFileCommand implements CommandService {
         if (actualCommandParts.length != requirementCountCommandParts) {
             throw new IllegalArgumentException("Command \"" + getCommand() + "\" is not correct");
         }
-        channel.pipeline().addLast(new ChunkedWriteHandler());
+        channel.pipeline().addLast(new FileServerHandler());
 
-        return actualCommandParts[1];
+        return localDir+"//"+actualCommandParts[1];
     }
 
     @Override
     public String getCommand() {
-        return "download";
+        return "upload";
     }
 }

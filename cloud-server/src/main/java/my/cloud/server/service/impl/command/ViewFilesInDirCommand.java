@@ -1,5 +1,6 @@
 package my.cloud.server.service.impl.command;
 
+import io.netty.channel.Channel;
 import my.cloud.server.service.CommandService;
 
 import java.io.File;
@@ -9,7 +10,7 @@ public class ViewFilesInDirCommand implements CommandService {
     private File cloudDir = new File(System.getenv("LOCALAPPDATA")+"//CloudProject");
 
     @Override
-    public String processCommand(String command) {
+    public String processCommand(String command, Channel channel) {
         final int requirementCountCommandParts = 2;
 
         String[] actualCommandParts = command.split("\\s");
@@ -21,7 +22,7 @@ public class ViewFilesInDirCommand implements CommandService {
     }
 
     private String process(String dirPath) {
-        StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder("");
         if (!cloudDir.exists()) {
             cloudDir.mkdirs();
         } else {
@@ -33,7 +34,7 @@ public class ViewFilesInDirCommand implements CommandService {
         }
         sb.setLength(sb.length()-2);
 
-        return sb.toString();
+        return "ls "+sb.toString();
     }
 
 

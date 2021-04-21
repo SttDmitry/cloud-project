@@ -1,15 +1,13 @@
-package my.cloud.server.service.impl.command;
+package my.cloud.client.service.impl.command;
 
 import io.netty.channel.Channel;
 import io.netty.handler.stream.ChunkedWriteHandler;
-import my.cloud.server.service.CommandService;
-import my.cloud.server.service.impl.handler.FileServerHandler;
+import my.cloud.client.service.CommandService;
+import my.cloud.client.service.impl.handler.FileServerHandler;
 
 import java.io.File;
 
 public class DownloadFileCommand implements CommandService {
-
-    private File cloudDir = new File(System.getenv("LOCALAPPDATA")+"//CloudProject");
 
     @Override
     public String processCommand(String command, Channel channel) {
