@@ -6,6 +6,6 @@ public class Main {
     public static void main(String[] args) throws Exception {
         Factory.getServerService().startServer();
         //Мои вопросы:
-        //
+        //1.
     }
 }
