@@ -46,17 +46,14 @@ public class MainController implements Initializable {
         if(!localFilesList.getItems().isEmpty() && !(localFilesList.getSelectionModel().getSelectedItem() == null)) {
             try {
                 System.out.println(localFiles.get(localFilesList.getSelectionModel().getSelectedItem()));
-                ChannelFuture futurePreload = networkService.getChannel().writeAndFlush("upload "+localFilesList.getSelectionModel().getSelectedItem());
-                try {
-                    futurePreload.sync();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+                networkService.getChannel().writeAndFlush("upload "+localFiles.get(localFilesList.getSelectionModel().getSelectedItem()).getTotalSpace()+" "+localFilesList.getSelectionModel().getSelectedItem());
                 networkService.getChannel().pipeline().remove(CommandInboundHandler.class);
                 networkService.getChannel().pipeline().addLast(new ChunkedWriteHandler());
                 ChannelFuture future = networkService.getChannel().writeAndFlush(new ChunkedFile(localFiles.get(localFilesList.getSelectionModel().getSelectedItem())));
                 //stage.hideAll + show wait
                 future.addListener((ChannelFutureListener) channelFuture -> System.out.println("Finish write"));
+                networkService.getChannel().pipeline().addLast(new CommandInboundHandler());
+                networkService.getChannel().pipeline().remove(ChunkedWriteHandler.class);
                 // stage.showAll + close wait
             } catch (IOException e) {
                 e.printStackTrace();

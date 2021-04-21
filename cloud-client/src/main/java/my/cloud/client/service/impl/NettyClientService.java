@@ -29,9 +29,6 @@ public class NettyClientService implements NetworkService {
         return channel;
     }
 
-    //    ChannelFuture future = channel.writeAndFlush(new ChunkedFile(new File("input-data/2021-04-12 19-05-19.mkv")));
-//        future.addListener((ChannelFutureListener) channelFuture -> System.out.println("Finish write"));
-
 
     public void start() {
         Thread t = new Thread(() -> {
@@ -47,8 +44,6 @@ public class NettyClientService implements NetworkService {
                                 socketChannel.pipeline().addLast(
                                         new ObjectEncoder(),
                                         new ObjectDecoder(ClassResolvers.cacheDisabled(null)),
-//                                        new StringEncoder(CharsetUtil.UTF_8),
-//                                        new StringDecoder(CharsetUtil.UTF_8),
                                         new CommandInboundHandler()
                                 );
                             }

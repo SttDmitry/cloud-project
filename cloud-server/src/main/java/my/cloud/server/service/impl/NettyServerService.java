@@ -47,12 +47,8 @@ public class NettyServerService implements ServerService {
                             channel.pipeline().addLast(
                                     new ObjectEncoder(),
                                     new ObjectDecoder(ClassResolvers.cacheDisabled(null)),
-//                                    new StringEncoder(CharsetUtil.UTF_8),
-//                                    new StringDecoder(CharsetUtil.UTF_8),
                                     new CommandInboundHandler()
                             );
-//                                    new ChunkedWriteHandler(),
-//                                    new FileServerHandler()
 
                         }
                     });
