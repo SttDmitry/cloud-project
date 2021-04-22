@@ -3,7 +3,7 @@ package my.cloud.client.service.impl.command;
 import io.netty.channel.Channel;
 import my.cloud.client.service.CommandService;
 
-import java.io.File;
+import java.io.*;
 
 public class ViewFilesInDirCommand implements CommandService {
 
@@ -14,6 +14,21 @@ public class ViewFilesInDirCommand implements CommandService {
         String[] actualCommandParts = command.split("\\s", 2);
         if (actualCommandParts.length != requirementCountCommandParts) {
             throw new IllegalArgumentException("Command \"" + getCommand() + "\" is not correct");
+        }
+        File file = new File("./Files/filesList.txt");
+        if (!file.exists()) {
+            try {
+                file.getParentFile().mkdirs();
+                file.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, false))){
+            writer.write(actualCommandParts[1]);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
 
         return actualCommandParts[1];

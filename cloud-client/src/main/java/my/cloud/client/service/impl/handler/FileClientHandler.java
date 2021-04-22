@@ -10,7 +10,7 @@ import io.netty.handler.stream.ChunkedFile;
 import java.io.File;
 import java.io.RandomAccessFile;
 
-public class FileServerHandler extends SimpleChannelInboundHandler<String> {
+public class FileClientHandler extends SimpleChannelInboundHandler<String> {
 
     private File cloudDir = new File(System.getenv("LOCALAPPDATA")+"//CloudProject");
 

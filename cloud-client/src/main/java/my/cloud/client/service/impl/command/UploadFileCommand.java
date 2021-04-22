@@ -1,9 +1,8 @@
 package my.cloud.client.service.impl.command;
 
 import io.netty.channel.Channel;
-import io.netty.handler.stream.ChunkedWriteHandler;
 import my.cloud.client.service.CommandService;
-import my.cloud.client.service.impl.handler.FileServerHandler;
+import my.cloud.client.service.impl.handler.FileClientHandler;
 
 import java.io.File;
 
@@ -19,7 +18,7 @@ public class UploadFileCommand implements CommandService {
         if (actualCommandParts.length != requirementCountCommandParts) {
             throw new IllegalArgumentException("Command \"" + getCommand() + "\" is not correct");
         }
-        channel.pipeline().addLast(new FileServerHandler());
+        channel.pipeline().addLast(new FileClientHandler());
 
         return localDir+"//"+actualCommandParts[1];
     }

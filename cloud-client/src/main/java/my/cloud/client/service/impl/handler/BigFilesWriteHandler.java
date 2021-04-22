@@ -1,4 +1,4 @@
-package my.cloud.server.service.impl.handler;
+package my.cloud.client.service.impl.handler;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
@@ -18,9 +18,9 @@ public class BigFilesWriteHandler extends SimpleChannelInboundHandler<ByteBuf> {
     private File fileToWrite;
     private long fileSpace;
 
-    public BigFilesWriteHandler (File ftw, long l){
+    public BigFilesWriteHandler(File ftw, long fileSpace){
         this.fileToWrite = ftw;
-        this.fileSpace = l;
+        this.fileSpace = fileSpace;
     }
 
 

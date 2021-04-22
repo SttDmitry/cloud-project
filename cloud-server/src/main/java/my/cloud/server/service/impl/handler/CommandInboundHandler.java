@@ -12,6 +12,6 @@ public class CommandInboundHandler extends SimpleChannelInboundHandler<Object> {
         System.out.println(command);
         String commandResult = dictionaryService.processCommand(command.toString(), ctx.channel());
         System.out.println(commandResult);
-//        ctx.writeAndFlush(commandResult);
+        ctx.writeAndFlush(commandResult);
     }
 }
