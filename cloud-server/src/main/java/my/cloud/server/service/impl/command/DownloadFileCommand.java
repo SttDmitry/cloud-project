@@ -7,7 +7,6 @@ import io.netty.handler.stream.ChunkedFile;
 import io.netty.handler.stream.ChunkedWriteHandler;
 import my.cloud.server.service.CommandService;
 import my.cloud.server.service.impl.handler.CommandInboundHandler;
-import my.cloud.server.service.impl.handler.FileServerHandler;
 
 import java.io.File;
 import java.io.IOException;

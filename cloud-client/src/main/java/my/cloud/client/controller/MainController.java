@@ -1,14 +1,9 @@
 package my.cloud.client.controller;
 
-import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
-import io.netty.handler.codec.serialization.ObjectDecoder;
-import io.netty.handler.codec.serialization.ObjectEncoder;
 import io.netty.handler.stream.ChunkedFile;
 import io.netty.handler.stream.ChunkedWriteHandler;
-import io.netty.util.CharsetUtil;
-import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
@@ -17,7 +12,6 @@ import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
 import my.cloud.client.factory.Factory;
 import my.cloud.client.service.NetworkService;
-import my.cloud.client.service.impl.handler.BigFilesWriteHandler;
 import my.cloud.client.service.impl.handler.CommandInboundHandler;
 
 import java.io.BufferedReader;
