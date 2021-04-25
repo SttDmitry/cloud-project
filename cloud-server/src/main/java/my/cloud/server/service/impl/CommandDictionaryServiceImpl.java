@@ -1,7 +1,7 @@
 package my.cloud.server.service.impl;
 
 import io.netty.channel.Channel;
-import my.cloud.server.Factory.Factory;
+import my.cloud.server.factory.Factory;
 import my.cloud.server.service.CommandDictionaryService;
 import my.cloud.server.service.CommandService;
 

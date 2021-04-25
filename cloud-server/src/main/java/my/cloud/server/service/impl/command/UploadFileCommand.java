@@ -28,7 +28,7 @@ public class UploadFileCommand implements CommandService {
         channel.pipeline().addLast(new ChunkedWriteHandler());
         channel.pipeline().addLast(new BigFilesWriteHandler(new File(cloudDir+"//"+actualCommandParts[2]),Long.parseLong(actualCommandParts[1])));
 
-        return actualCommandParts[2];
+        return actualCommandParts[0]+actualCommandParts[1];
     }
 
     @Override

@@ -31,7 +31,7 @@ public class MainController implements Initializable {
     public Button downButton;
     public TextField localPath;
     public TextField cloudPath;
-    private File cloudDir = new File(System.getenv("LOCALAPPDATA")+"//CloudProject");
+    private File cloudDir = new File(System.getenv("LOCALAPPDATA") + "//CloudProject");
     private File localDir = new File(".");
 
     public NetworkService networkService;
@@ -39,27 +39,16 @@ public class MainController implements Initializable {
     private Map<String, File> localFiles = new HashMap<>();
 
 
-
-
     public void uploadFile(ActionEvent actionEvent) {
-        if(!localFilesList.getItems().isEmpty() && !(localFilesList.getSelectionModel().getSelectedItem() == null)) {
+        if (!localFilesList.getItems().isEmpty() && !(localFilesList.getSelectionModel().getSelectedItem() == null)) {
             try {
                 System.out.println(localFiles.get(localFilesList.getSelectionModel().getSelectedItem()));
-                networkService.getChannel().writeAndFlush("upload "+localFiles.get(localFilesList.getSelectionModel().getSelectedItem()).getTotalSpace()+" "+localFilesList.getSelectionModel().getSelectedItem());
-                networkService.getChannel().pipeline().remove(CommandInboundHandler.class);
-                networkService.getChannel().pipeline().addLast(new ChunkedWriteHandler());
-                ChannelFuture future = networkService.getChannel().writeAndFlush(new ChunkedFile(localFiles.get(localFilesList.getSelectionModel().getSelectedItem())));
-                //stage.hideAll + show wait
-                future.addListener((ChannelFutureListener) channelFuture -> {
-                    networkService.getChannel().pipeline().addLast(new CommandInboundHandler());
-                    networkService.getChannel().pipeline().remove(ChunkedWriteHandler.class);
-                    System.out.println("Finish write");
-                });
-
-                    Thread.sleep(300);
+                networkService.getChannel().writeAndFlush("upload " + localFiles.get(localFilesList.getSelectionModel().getSelectedItem()).getTotalSpace() + " " + localFilesList.getSelectionModel().getSelectedItem());
+                System.out.println("Finish write");
+                Thread.sleep(300);
                 refreshFilesLists();
                 // stage.showAll + close wait
-            } catch (IOException | InterruptedException e) {
+            } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
@@ -67,12 +56,11 @@ public class MainController implements Initializable {
     }
 
     public void downloadFile(ActionEvent actionEvent) {
-        if(!cloudFilesList.getItems().isEmpty() && !(cloudFilesList.getSelectionModel().getSelectedItem() == null)) {
-
-                System.out.println(localFiles.get(localFilesList.getSelectionModel().getSelectedItem()));
-                networkService.getChannel().writeAndFlush("download "+ localDir+"//"+cloudFilesList.getSelectionModel().getSelectedItem());
-                //stage.hideAll + show wait
-                // stage.showAll + close wait
+        if (!cloudFilesList.getItems().isEmpty() && !(cloudFilesList.getSelectionModel().getSelectedItem() == null)) {
+            System.out.println(localFiles.get(localFilesList.getSelectionModel().getSelectedItem()));
+            networkService.getChannel().writeAndFlush("download " + localDir + "//" + cloudFilesList.getSelectionModel().getSelectedItem());
+            //stage.hideAll + show wait
+            // stage.showAll + close wait
             try {
                 Thread.sleep(300);
             } catch (InterruptedException e) {
@@ -115,20 +103,19 @@ public class MainController implements Initializable {
     }
 
 
-
-    private void refreshFilesLists(){
+    private void refreshFilesLists() {
         localFilesList.getItems().clear();
         cloudFilesList.getItems().clear();
         networkService.getChannel().writeAndFlush("ls .");
         for (File childFile : localDir.listFiles()) {
-            if (childFile.isFile()){
+            if (childFile.isFile()) {
                 localFiles.put(childFile.getName(), childFile);
                 localFilesList.getItems().add(childFile.getName());
             }
         }
         try {
-            Thread.sleep(500);}
-        catch (InterruptedException e){
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
             e.printStackTrace();
         }
         try (BufferedReader reader = new BufferedReader(new FileReader("./Files/filesList.txt"))) {
