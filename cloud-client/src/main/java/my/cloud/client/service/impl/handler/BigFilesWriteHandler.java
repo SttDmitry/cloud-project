@@ -8,15 +8,12 @@ import io.netty.handler.codec.serialization.ObjectDecoder;
 import io.netty.handler.codec.serialization.ObjectEncoder;
 import io.netty.handler.stream.ChunkedWriteHandler;
 
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.OutputStream;
+import java.io.*;
 
 public class BigFilesWriteHandler extends SimpleChannelInboundHandler<ByteBuf> {
 
-    private File fileToWrite;
-    private long fileSpace;
+    private final File fileToWrite;
+    private final long fileSpace;
 
     public BigFilesWriteHandler(File ftw, long fileSpace) {
         this.fileToWrite = ftw;
@@ -25,18 +22,12 @@ public class BigFilesWriteHandler extends SimpleChannelInboundHandler<ByteBuf> {
 
 
     @Override
-    protected void channelRead0(ChannelHandlerContext ctx, ByteBuf bb) throws Exception {
+    protected void channelRead0(ChannelHandlerContext ctx, ByteBuf bb) {
         System.out.println(fileToWrite);
 
         ByteBuf byteBuf = bb.retain();
 
-        try (OutputStream os = new BufferedOutputStream(new FileOutputStream(fileToWrite, true))) {
-            while (byteBuf.isReadable()) {
-                os.write(byteBuf.readByte());
-            }
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
+        outputFileWrite(byteBuf);
 
         byteBuf.release();
 
@@ -48,5 +39,15 @@ public class BigFilesWriteHandler extends SimpleChannelInboundHandler<ByteBuf> {
             ctx.pipeline().remove(BigFilesWriteHandler.class);
         }
 
+    }
+
+    private void outputFileWrite(ByteBuf byteBuf) {
+        try (OutputStream os = new BufferedOutputStream(new FileOutputStream(fileToWrite, true))) {
+            while (byteBuf.isReadable()) {
+                os.write(byteBuf.readByte());
+            }
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
     }
 }

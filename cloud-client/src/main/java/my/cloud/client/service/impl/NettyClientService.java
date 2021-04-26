@@ -51,5 +51,6 @@ public class NettyClientService implements NetworkService {
                 workerGroup.shutdownGracefully();
             }
         });
+        t.start();
     }
 }

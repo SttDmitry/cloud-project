@@ -13,7 +13,7 @@ import java.io.IOException;
 
 public class DownloadFileCommand implements CommandService {
 
-    private File cloudDir = new File(System.getenv("LOCALAPPDATA") + "//CloudProject");
+    private final File cloudDir = new File(System.getenv("LOCALAPPDATA") + "//CloudProject");
 
     @Override
     public String processCommand(String command, Channel channel) {
@@ -24,8 +24,15 @@ public class DownloadFileCommand implements CommandService {
             throw new IllegalArgumentException("Command \"" + getCommand() + "\" is not correct");
         }
 
+        channelSetForDownloading(channel, actualCommandParts[1]);
+
+
+        return actualCommandParts[1];
+    }
+
+    private void channelSetForDownloading(Channel channel, String actualCommandPart) {
         try {
-            File File = new File(actualCommandParts[1]);
+            File File = new File(actualCommandPart);
             File newFile = new File(cloudDir + "//" + File.getName());
             channel.writeAndFlush("download " + newFile.getTotalSpace() + " " + File);
             channel.pipeline().remove(CommandInboundHandler.class);
@@ -38,9 +45,6 @@ public class DownloadFileCommand implements CommandService {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-
-        return actualCommandParts[1];
     }
 
     @Override

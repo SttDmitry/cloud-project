@@ -12,7 +12,7 @@ import java.io.File;
 
 public class UploadFileCommand implements CommandService {
 
-    private File cloudDir = new File(System.getenv("LOCALAPPDATA") + "//CloudProject");
+    private final File cloudDir = new File(System.getenv("LOCALAPPDATA") + "//CloudProject");
 
     @Override
     public String processCommand(String command, Channel channel) {

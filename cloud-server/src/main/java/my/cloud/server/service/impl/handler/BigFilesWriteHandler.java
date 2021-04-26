@@ -15,8 +15,8 @@ import java.io.OutputStream;
 
 public class BigFilesWriteHandler extends SimpleChannelInboundHandler<ByteBuf> {
 
-    private File fileToWrite;
-    private long fileSpace;
+    private final File fileToWrite;
+    private final long fileSpace;
 
     public BigFilesWriteHandler(File ftw, long l) {
         this.fileToWrite = ftw;
@@ -25,18 +25,12 @@ public class BigFilesWriteHandler extends SimpleChannelInboundHandler<ByteBuf> {
 
 
     @Override
-    protected void channelRead0(ChannelHandlerContext ctx, ByteBuf bb) throws Exception {
+    protected void channelRead0(ChannelHandlerContext ctx, ByteBuf bb) {
         System.out.println(fileToWrite);
 
         ByteBuf byteBuf = bb.retain();
 
-        try (OutputStream os = new BufferedOutputStream(new FileOutputStream(fileToWrite, true))) {
-            while (byteBuf.isReadable()) {
-                os.write(byteBuf.readByte());
-            }
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
+        outputFileWriter(byteBuf);
 
         byteBuf.release();
 
@@ -48,5 +42,15 @@ public class BigFilesWriteHandler extends SimpleChannelInboundHandler<ByteBuf> {
             ctx.pipeline().remove(BigFilesWriteHandler.class);
         }
 
+    }
+
+    private void outputFileWriter(ByteBuf byteBuf) {
+        try (OutputStream os = new BufferedOutputStream(new FileOutputStream(fileToWrite, true))) {
+            while (byteBuf.isReadable()) {
+                os.write(byteBuf.readByte());
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
     }
 }

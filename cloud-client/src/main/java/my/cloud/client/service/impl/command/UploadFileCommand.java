@@ -10,10 +10,9 @@ import my.cloud.client.service.impl.handler.CommandInboundHandler;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Objects;
 
 public class UploadFileCommand implements CommandService {
-
-    private File localDir = new File(".");
 
     @Override
     public String processCommand(String command, Channel channel) {
@@ -27,18 +26,23 @@ public class UploadFileCommand implements CommandService {
         channel.pipeline().remove(CommandInboundHandler.class);
         channel.pipeline().addLast(new ChunkedWriteHandler());
         ChannelFuture future = null;
-        try {
-            future = channel.writeAndFlush(new ChunkedFile(new File(actualCommandParts[1])));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        future = getChannelFuture(channel, actualCommandParts, future);
         //stage.hideAll + show wait
-        future.addListener((ChannelFutureListener) channelFuture -> {
+        Objects.requireNonNull(future).addListener((ChannelFutureListener) channelFuture -> {
             channel.pipeline().addLast(new CommandInboundHandler());
             channel.pipeline().remove(ChunkedWriteHandler.class);
         });
 
         return actualCommandParts[1];
+    }
+
+    private ChannelFuture getChannelFuture(Channel channel, String[] actualCommandParts, ChannelFuture future) {
+        try {
+            future = channel.writeAndFlush(new ChunkedFile(new File(actualCommandParts[1])));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return future;
     }
 
     @Override
