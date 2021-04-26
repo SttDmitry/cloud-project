@@ -25,7 +25,7 @@ public class DownloadFileCommand implements CommandService {
         channel.pipeline().remove(ObjectDecoder.class);
         channel.pipeline().remove(ObjectEncoder.class);
         channel.pipeline().addLast(new ChunkedWriteHandler());
-        channel.pipeline().addLast(new BigFilesWriteHandler(new File(actualCommandParts[2]),Long.parseLong(actualCommandParts[1])));
+        channel.pipeline().addLast(new BigFilesWriteHandler(new File(actualCommandParts[2]), Long.parseLong(actualCommandParts[1])));
 
         return actualCommandParts[1];
     }

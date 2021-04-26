@@ -7,7 +7,7 @@ import java.io.File;
 
 public class ViewFilesInDirCommand implements CommandService {
 
-    private File cloudDir = new File(System.getenv("LOCALAPPDATA")+"//CloudProject");
+    private File cloudDir = new File(System.getenv("LOCALAPPDATA") + "//CloudProject");
 
     @Override
     public String processCommand(String command, Channel channel) {
@@ -27,14 +27,14 @@ public class ViewFilesInDirCommand implements CommandService {
             cloudDir.mkdirs();
         } else {
             for (File childFile : cloudDir.listFiles()) {
-                if (childFile.isFile()){
+                if (childFile.isFile()) {
                     sb.append(childFile.getName()).append(", ");
                 }
             }
         }
-        sb.setLength(sb.length()-2);
+        sb.setLength(sb.length() - 2);
 
-        return "ls "+sb.toString();
+        return "ls " + sb.toString();
     }
 
 

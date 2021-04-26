@@ -25,7 +25,7 @@ public class ViewFilesInDirCommand implements CommandService {
             }
         }
 
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, false))){
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, false))) {
             writer.write(actualCommandParts[1]);
         } catch (IOException e) {
             e.printStackTrace();

@@ -1,9 +1,5 @@
 package my.cloud.client.controller;
 
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelFutureListener;
-import io.netty.handler.stream.ChunkedFile;
-import io.netty.handler.stream.ChunkedWriteHandler;
 import javafx.event.ActionEvent;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
@@ -12,7 +8,6 @@ import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
 import my.cloud.client.factory.Factory;
 import my.cloud.client.service.NetworkService;
-import my.cloud.client.service.impl.handler.CommandInboundHandler;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -41,16 +36,11 @@ public class MainController implements Initializable {
 
     public void uploadFile(ActionEvent actionEvent) {
         if (!localFilesList.getItems().isEmpty() && !(localFilesList.getSelectionModel().getSelectedItem() == null)) {
-            try {
-                System.out.println(localFiles.get(localFilesList.getSelectionModel().getSelectedItem()));
-                networkService.getChannel().writeAndFlush("upload " + localFiles.get(localFilesList.getSelectionModel().getSelectedItem()).getTotalSpace() + " " + localFilesList.getSelectionModel().getSelectedItem());
-                System.out.println("Finish write");
-                Thread.sleep(300);
-                refreshFilesLists();
-                // stage.showAll + close wait
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+            System.out.println(localFiles.get(localFilesList.getSelectionModel().getSelectedItem()));
+            networkService.getChannel().writeAndFlush("upload " + localFiles.get(localFilesList.getSelectionModel().getSelectedItem()).getTotalSpace() + " " + localFilesList.getSelectionModel().getSelectedItem());
+            System.out.println("Finish write");
+            refreshFilesLists();
+            // stage.showAll + close wait
         }
 
     }
@@ -61,11 +51,6 @@ public class MainController implements Initializable {
             networkService.getChannel().writeAndFlush("download " + localDir + "//" + cloudFilesList.getSelectionModel().getSelectedItem());
             //stage.hideAll + show wait
             // stage.showAll + close wait
-            try {
-                Thread.sleep(300);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
             refreshFilesLists();
 
         }
@@ -89,11 +74,7 @@ public class MainController implements Initializable {
         networkService = Factory.getNetworkService();
         networkService.start();
 
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        // Wait for load of resources
         System.out.println(networkService.getChannel());
         downButton.setDisable(true);
         uplButton.setDisable(true);
@@ -113,11 +94,7 @@ public class MainController implements Initializable {
                 localFilesList.getItems().add(childFile.getName());
             }
         }
-        try {
-            Thread.sleep(500);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        //Wait for ..
         try (BufferedReader reader = new BufferedReader(new FileReader("./Files/filesList.txt"))) {
             String resultCommand = reader.readLine();
             String[] listOfFiles = resultCommand.split(", ");

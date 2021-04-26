@@ -18,7 +18,7 @@ public class BigFilesWriteHandler extends SimpleChannelInboundHandler<ByteBuf> {
     private File fileToWrite;
     private long fileSpace;
 
-    public BigFilesWriteHandler (File ftw, long l){
+    public BigFilesWriteHandler(File ftw, long l) {
         this.fileToWrite = ftw;
         this.fileSpace = l;
     }
@@ -40,12 +40,13 @@ public class BigFilesWriteHandler extends SimpleChannelInboundHandler<ByteBuf> {
 
         byteBuf.release();
 
-        if (fileToWrite.getTotalSpace() == fileSpace){
+        if (fileToWrite.getTotalSpace() == fileSpace) {
             ctx.pipeline().addLast(new ObjectEncoder());
             ctx.pipeline().addLast(new ObjectDecoder(ClassResolvers.cacheDisabled(null)));
             ctx.pipeline().addLast(new CommandInboundHandler());
             ctx.pipeline().remove(ChunkedWriteHandler.class);
-            ctx.pipeline().remove(BigFilesWriteHandler.class);}
+            ctx.pipeline().remove(BigFilesWriteHandler.class);
+        }
 
     }
 }
