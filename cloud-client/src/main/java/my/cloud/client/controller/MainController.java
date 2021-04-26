@@ -6,6 +6,7 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import my.cloud.client.factory.Factory;
 import my.cloud.client.service.NetworkService;
+import my.cloud.common.Common;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -25,8 +26,6 @@ public class MainController implements Initializable {
     public Button downButton;
     public TextField localPath;
     public TextField cloudPath;
-    private final File cloudDir = new File(System.getenv("LOCALAPPDATA") + "//CloudProject");
-    private final File localDir = new File(".");
 
     public NetworkService networkService;
 
@@ -36,7 +35,7 @@ public class MainController implements Initializable {
     public void uploadFile() {
         if (!localFilesList.getItems().isEmpty() && !(localFilesList.getSelectionModel().getSelectedItem() == null)) {
             System.out.println(localFiles.get(localFilesList.getSelectionModel().getSelectedItem()));
-            networkService.getChannel().writeAndFlush("upload " + localFiles.get(localFilesList.getSelectionModel().getSelectedItem()).getTotalSpace() + " " + localFilesList.getSelectionModel().getSelectedItem());
+            networkService.getChannel().writeAndFlush(Common.UPLOAD.toString() + localFiles.get(localFilesList.getSelectionModel().getSelectedItem()).getTotalSpace() + " " + localFilesList.getSelectionModel().getSelectedItem());
             System.out.println("Finish write");
             refreshFilesLists();
             // stage.showAll + close wait
@@ -47,7 +46,7 @@ public class MainController implements Initializable {
     public void downloadFile() {
         if (!cloudFilesList.getItems().isEmpty() && !(cloudFilesList.getSelectionModel().getSelectedItem() == null)) {
             System.out.println(localFiles.get(localFilesList.getSelectionModel().getSelectedItem()));
-            networkService.getChannel().writeAndFlush("download " + localDir + "//" + cloudFilesList.getSelectionModel().getSelectedItem());
+            networkService.getChannel().writeAndFlush(Common.DOWNLOAD.toString() + Common.LOCAL_DIR + File.separator + cloudFilesList.getSelectionModel().getSelectedItem());
             //stage.hideAll + show wait
             // stage.showAll + close wait
             refreshFilesLists();
@@ -78,23 +77,23 @@ public class MainController implements Initializable {
         downButton.setDisable(true);
         uplButton.setDisable(true);
         refreshFilesLists();
-        cloudPath.setText(cloudDir.getName());
-        localPath.setText(localDir.getName());
+        cloudPath.setText(new File(Common.CLOUD_DIR.toString()).getName());
+        localPath.setText(new File(Common.LOCAL_DIR.toString()).getName());
     }
 
 
     private void refreshFilesLists() {
         localFilesList.getItems().clear();
         cloudFilesList.getItems().clear();
-        networkService.getChannel().writeAndFlush("ls");
-        for (File childFile : Objects.requireNonNull(localDir.listFiles())) {
+        networkService.getChannel().writeAndFlush(Common.LS.toString());
+        for (File childFile : Objects.requireNonNull(new File(Common.LOCAL_DIR.toString()).listFiles())) {
             if (childFile.isFile()) {
                 localFiles.put(childFile.getName(), childFile);
                 localFilesList.getItems().add(childFile.getName());
             }
         }
         //Wait for ..
-        try (BufferedReader reader = new BufferedReader(new FileReader("./Files/filesList.txt"))) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(Common.FILES_LIST.toString()))) {
             String resultCommand = reader.readLine();
             String[] listOfFiles = resultCommand.split(", ");
             cloudFilesList.getItems().clear();

@@ -4,6 +4,7 @@ import io.netty.channel.Channel;
 import io.netty.handler.codec.serialization.ObjectDecoder;
 import io.netty.handler.codec.serialization.ObjectEncoder;
 import io.netty.handler.stream.ChunkedWriteHandler;
+import my.cloud.common.Common;
 import my.cloud.server.service.CommandService;
 import my.cloud.server.service.impl.handler.BigFilesWriteHandler;
 import my.cloud.server.service.impl.handler.CommandInboundHandler;
@@ -11,8 +12,6 @@ import my.cloud.server.service.impl.handler.CommandInboundHandler;
 import java.io.File;
 
 public class UploadFileCommand implements CommandService {
-
-    private final File cloudDir = new File(System.getenv("LOCALAPPDATA") + "//CloudProject");
 
     @Override
     public String processCommand(String command, Channel channel) {
@@ -26,13 +25,13 @@ public class UploadFileCommand implements CommandService {
         channel.pipeline().remove(ObjectDecoder.class);
         channel.pipeline().remove(ObjectEncoder.class);
         channel.pipeline().addLast(new ChunkedWriteHandler());
-        channel.pipeline().addLast(new BigFilesWriteHandler(new File(cloudDir + "//" + actualCommandParts[2]), Long.parseLong(actualCommandParts[1])));
+        channel.pipeline().addLast(new BigFilesWriteHandler(new File(Common.CLOUD_DIR + File.separator + actualCommandParts[2]), Long.parseLong(actualCommandParts[1])));
 
         return actualCommandParts[0] + actualCommandParts[1];
     }
 
     @Override
     public String getCommand() {
-        return "upload";
+        return Common.UPLOAD.toString();
     }
 }

@@ -5,6 +5,7 @@ import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.handler.stream.ChunkedFile;
 import io.netty.handler.stream.ChunkedWriteHandler;
+import my.cloud.common.Common;
 import my.cloud.server.service.CommandService;
 import my.cloud.server.service.impl.handler.CommandInboundHandler;
 
@@ -12,8 +13,6 @@ import java.io.File;
 import java.io.IOException;
 
 public class DownloadFileCommand implements CommandService {
-
-    private final File cloudDir = new File(System.getenv("LOCALAPPDATA") + "//CloudProject");
 
     @Override
     public String processCommand(String command, Channel channel) {
@@ -33,8 +32,8 @@ public class DownloadFileCommand implements CommandService {
     private void channelSetForDownloading(Channel channel, String actualCommandPart) {
         try {
             File File = new File(actualCommandPart);
-            File newFile = new File(cloudDir + "//" + File.getName());
-            channel.writeAndFlush("download " + newFile.getTotalSpace() + " " + File);
+            File newFile = new File(Common.CLOUD_DIR + File.separator + File.getName());
+            channel.writeAndFlush(Common.DOWNLOAD.toString() + newFile.getTotalSpace() + " " + File);
             channel.pipeline().remove(CommandInboundHandler.class);
             channel.pipeline().addLast(new ChunkedWriteHandler());
             ChannelFuture future = channel.writeAndFlush(new ChunkedFile(newFile));
@@ -49,6 +48,6 @@ public class DownloadFileCommand implements CommandService {
 
     @Override
     public String getCommand() {
-        return "download";
+        return Common.DOWNLOAD.toString();
     }
 }

@@ -7,6 +7,7 @@ import io.netty.handler.stream.ChunkedFile;
 import io.netty.handler.stream.ChunkedWriteHandler;
 import my.cloud.client.service.CommandService;
 import my.cloud.client.service.impl.handler.CommandInboundHandler;
+import my.cloud.common.Common;
 
 import java.io.File;
 import java.io.IOException;
@@ -47,6 +48,6 @@ public class UploadFileCommand implements CommandService {
 
     @Override
     public String getCommand() {
-        return "upload";
+        return Common.UPLOAD.toString();
     }
 }

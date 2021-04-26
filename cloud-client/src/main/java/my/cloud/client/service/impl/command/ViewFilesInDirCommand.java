@@ -2,6 +2,7 @@ package my.cloud.client.service.impl.command;
 
 import io.netty.channel.Channel;
 import my.cloud.client.service.CommandService;
+import my.cloud.common.Common;
 
 import java.io.*;
 
@@ -15,7 +16,7 @@ public class ViewFilesInDirCommand implements CommandService {
         if (actualCommandParts.length != requirementCountCommandParts) {
             throw new IllegalArgumentException("Command \"" + getCommand() + "\" is not correct");
         }
-        File file = new File("./Files/filesList.txt");
+        File file = new File(Common.FILES_LIST.toString());
         if (!file.exists()) {
             file.getParentFile().mkdirs();
             fileCreate(file);
@@ -45,6 +46,6 @@ public class ViewFilesInDirCommand implements CommandService {
 
     @Override
     public String getCommand() {
-        return "ls";
+        return Common.LS.toString();
     }
 }

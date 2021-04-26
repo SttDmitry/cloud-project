@@ -7,6 +7,7 @@ import io.netty.handler.stream.ChunkedWriteHandler;
 import my.cloud.client.service.CommandService;
 import my.cloud.client.service.impl.handler.BigFilesWriteHandler;
 import my.cloud.client.service.impl.handler.CommandInboundHandler;
+import my.cloud.common.Common;
 
 import java.io.File;
 
@@ -32,6 +33,6 @@ public class DownloadFileCommand implements CommandService {
 
     @Override
     public String getCommand() {
-        return "download";
+        return Common.DOWNLOAD.toString();
     }
 }
