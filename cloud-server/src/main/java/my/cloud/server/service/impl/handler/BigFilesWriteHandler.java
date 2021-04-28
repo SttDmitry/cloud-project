@@ -32,15 +32,17 @@ public class BigFilesWriteHandler extends SimpleChannelInboundHandler<ByteBuf> {
 
         outputFileWriter(byteBuf);
 
-        byteBuf.release();
-
-        if (fileToWrite.getTotalSpace() == fileSpace) {
+        if (fileSpace - fileToWrite.length() < 65536) {
+            System.out.println("Finish upload server");
             ctx.pipeline().addLast(new ObjectEncoder());
             ctx.pipeline().addLast(new ObjectDecoder(ClassResolvers.cacheDisabled(null)));
             ctx.pipeline().addLast(new CommandInboundHandler());
             ctx.pipeline().remove(ChunkedWriteHandler.class);
             ctx.pipeline().remove(BigFilesWriteHandler.class);
+            ctx.fireChannelInactive();
         }
+
+        byteBuf.release();
 
     }
 

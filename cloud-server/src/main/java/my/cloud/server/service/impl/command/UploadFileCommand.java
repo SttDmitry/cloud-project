@@ -21,13 +21,17 @@ public class UploadFileCommand implements CommandService {
         if (actualCommandParts.length != requirementCountCommandParts) {
             throw new IllegalArgumentException("Command \"" + getCommand() + "\" is not correct");
         }
+        File file = new File (Common.CLOUD_DIR + File.separator + actualCommandParts[2]);
+        if (file.exists()) {
+            file.renameTo(new File(Common.CLOUD_DIR + File.separator + "copy" + actualCommandParts[2]));
+        }
         channel.pipeline().remove(CommandInboundHandler.class);
         channel.pipeline().remove(ObjectDecoder.class);
         channel.pipeline().remove(ObjectEncoder.class);
         channel.pipeline().addLast(new ChunkedWriteHandler());
-        channel.pipeline().addLast(new BigFilesWriteHandler(new File(Common.CLOUD_DIR + File.separator + actualCommandParts[2]), Long.parseLong(actualCommandParts[1])));
+        channel.pipeline().addLast(new BigFilesWriteHandler(file, Long.parseLong(actualCommandParts[1])));
 
-        return actualCommandParts[0] + actualCommandParts[1];
+        return actualCommandParts[0] + " " + actualCommandParts[1];
     }
 
     @Override

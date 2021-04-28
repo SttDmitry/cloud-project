@@ -18,6 +18,25 @@ public class NettyClientService implements NetworkService {
     private static final String HOST = "localhost";
     private static final int PORT = 8189;
 
+    protected boolean uploadFinish = false;
+    protected boolean downloadFinish = false;
+
+    public boolean isUploadFinish() {
+        return uploadFinish;
+    }
+
+    public void setUploadFinish(boolean uploadFinish) {
+        this.uploadFinish = uploadFinish;
+    }
+
+    public boolean isDownloadFinish() {
+        return downloadFinish;
+    }
+
+    public void setDownloadFinish(boolean downloadFinish) {
+        this.downloadFinish = downloadFinish;
+    }
+
     private SocketChannel channel;
 
     public SocketChannel getChannel() {

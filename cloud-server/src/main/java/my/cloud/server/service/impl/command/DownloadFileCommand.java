@@ -33,11 +33,12 @@ public class DownloadFileCommand implements CommandService {
         try {
             File File = new File(actualCommandPart);
             File newFile = new File(Common.CLOUD_DIR + File.separator + File.getName());
-            channel.writeAndFlush(Common.DOWNLOAD.toString() + newFile.getTotalSpace() + " " + File);
+            channel.writeAndFlush(Common.DOWNLOAD + " " + newFile.length() + " " + File);
             channel.pipeline().remove(CommandInboundHandler.class);
             channel.pipeline().addLast(new ChunkedWriteHandler());
             ChannelFuture future = channel.writeAndFlush(new ChunkedFile(newFile));
             future.addListener((ChannelFutureListener) channelFuture -> {
+                System.out.println("Finish download server");
                 channel.pipeline().addLast(new CommandInboundHandler());
                 channel.pipeline().remove(ChunkedWriteHandler.class);
             });

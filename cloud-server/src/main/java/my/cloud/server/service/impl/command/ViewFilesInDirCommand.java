@@ -24,7 +24,7 @@ public class ViewFilesInDirCommand implements CommandService {
     }
 
     private String process() {
-        StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder(" ");
         if (!cloudDir.exists()) {
             cloudDir.mkdirs();
         } else {

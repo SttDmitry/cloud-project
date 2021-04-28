@@ -1,9 +1,9 @@
 package my.cloud.common;
 
 public enum Common {
-    LS("ls "),
-    DOWNLOAD("download "),
-    UPLOAD("upload "),
+    LS("ls"),
+    DOWNLOAD("download"),
+    UPLOAD("upload"),
     LOCAL_DIR("."),
     CLOUD_DIR(System.getenv("LOCALAPPDATA") + "//CloudProject"),
     FILES_LIST(LOCAL_DIR + "//Files//filesList.txt");
