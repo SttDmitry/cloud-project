@@ -1,5 +1,6 @@
 package my.cloud.client.controller;
 
+import io.netty.channel.ChannelFuture;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
@@ -9,6 +10,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
+import javafx.scene.input.MouseEvent;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
@@ -44,26 +46,34 @@ public class MainController implements Initializable {
 
     public void uploadFile() {
         if (!localFilesList.getItems().isEmpty() && !(localFilesList.getSelectionModel().getSelectedItem() == null)) {
-//            System.out.println(localFiles.get(localFilesList.getSelectionModel().getSelectedItem()));
+            System.out.println(localFiles.get(localFilesList.getSelectionModel().getSelectedItem()));
             networkService.getChannel().writeAndFlush(Common.UPLOAD + " " + localFiles.get(localFilesList.getSelectionModel().getSelectedItem()).length() + " " + localFilesList.getSelectionModel().getSelectedItem());
-
-            Platform.runLater(()-> {
+            ChannelFuture future = networkService.getChannel().newSucceededFuture();
+            try {
+                waiting();
+                future.await();
+                waitFinished();
                 refreshFilesLists();
-            });
-            // stage.showAll + close wait
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
 
     }
 
     public void downloadFile() {
         if (!cloudFilesList.getItems().isEmpty() && !(cloudFilesList.getSelectionModel().getSelectedItem() == null)) {
-            System.out.println(localFiles.get(localFilesList.getSelectionModel().getSelectedItem()));
+            System.out.println(Common.DOWNLOAD + " " + Common.LOCAL_DIR + File.separator + cloudFilesList.getSelectionModel().getSelectedItem());
             networkService.getChannel().writeAndFlush(Common.DOWNLOAD + " " + Common.LOCAL_DIR + File.separator + cloudFilesList.getSelectionModel().getSelectedItem());
-            //stage.hideAll + show wait
-            // stage.showAll + close wait
-            Platform.runLater(()-> {
+            ChannelFuture future = networkService.getChannel().newSucceededFuture();
+            try {
+                waiting();
+                future.await();
+                waitFinished();
                 refreshFilesLists();
-            });
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -82,14 +92,15 @@ public class MainController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        Platform.runLater(()->{
+        Platform.runLater(() -> {
             stage = (Stage) localPath.getScene().getWindow();
         });
         networkService = Factory.getNetworkService();
         networkService.start();
         long mil = System.currentTimeMillis();
-        while (System.currentTimeMillis() - mil < 1000){
-            waiting();}
+        while (System.currentTimeMillis() - mil < 1000) {
+            waiting();
+        }
         waitFinished();
         System.out.println(networkService.getChannel());
         downButton.setDisable(true);
@@ -102,8 +113,9 @@ public class MainController implements Initializable {
 
     private void refreshFilesLists() {
         long mil = System.currentTimeMillis();
-        while (System.currentTimeMillis() - mil < 300){
-            waiting();}
+        while (System.currentTimeMillis() - mil < 300) {
+            waiting();
+        }
         waitFinished();
         localFilesList.getItems().clear();
         cloudFilesList.getItems().clear();
@@ -114,14 +126,15 @@ public class MainController implements Initializable {
                 localFilesList.getItems().add(childFile.getName());
             }
         }
-        while (System.currentTimeMillis() - mil < 1000){
-        waiting();}
+        while (System.currentTimeMillis() - mil < 1000) {
+            waiting();
+        }
         waitFinished();
         try (BufferedReader reader = new BufferedReader(new FileReader(Common.FILES_LIST.toString()))) {
             String resultCommand = reader.readLine();
             String[] listOfFiles = resultCommand.split(", ");
-            cloudFilesList.getItems().clear();
-            cloudFilesList.getItems().addAll(listOfFiles);
+                cloudFilesList.getItems().clear();
+                cloudFilesList.getItems().addAll(listOfFiles);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -129,15 +142,27 @@ public class MainController implements Initializable {
 
     public void waiting() {
         if (stage != null) {
-            stage.setOpacity(0.1f);
+                stage.setOpacity(0.1f);
+                localFilesList.setDisable(true);
+                cloudFilesList.setDisable(true);
+                downButton.setDisable(true);
+                uplButton.setDisable(true);
         }
     }
 
-    public void waitFinished(){
+    public void waitFinished() {
         if (stage != null) {
-            stage.setOpacity(1f);
+                stage.setOpacity(1f);
+                localFilesList.setDisable(false);
+                cloudFilesList.setDisable(false);
         }
     }
 
+    public void shutdown() {
+        networkService.shutdown();
+    }
 
+    public void refresh() {
+        refreshFilesLists();
+    }
 }

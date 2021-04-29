@@ -3,7 +3,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="my.cloud.client.controller.MainController">
+<AnchorPane onMouseClicked="#refresh" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="my.cloud.client.controller.MainController">
    <children>
       <TextField fx:id="localPath" editable="false" layoutX="14.0" layoutY="14.0" prefHeight="25.0" prefWidth="265.0" text="C:\\..." AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="10.0" />
       <TextField fx:id="cloudPath" editable="false" layoutX="321.0" layoutY="14.0" prefHeight="25.0" prefWidth="265.0" text="User:\\..." AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="10.0" />

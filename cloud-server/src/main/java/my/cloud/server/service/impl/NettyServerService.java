@@ -37,7 +37,7 @@ public class NettyServerService implements ServerService {
                         protected void initChannel(SocketChannel channel) {
                             channel.pipeline().addLast(
                                     new ObjectEncoder(),
-                                    new ObjectDecoder(ClassResolvers.cacheDisabled(null)),
+                                    new ObjectDecoder(150*1024*1024,ClassResolvers.cacheDisabled(null)),
                                     new CommandInboundHandler()
                             );
 

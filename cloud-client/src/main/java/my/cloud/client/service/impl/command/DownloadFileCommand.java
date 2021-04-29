@@ -22,8 +22,8 @@ public class DownloadFileCommand implements CommandService {
             throw new IllegalArgumentException("Command \"" + getCommand() + "\" is not correct");
         }
         File file = new File (actualCommandParts[2]);
-        if (file.exists()) {
-            file.renameTo(new File(Common.LOCAL_DIR + File.separator + "copy" + file.getName()));
+        while (file.exists()) {
+            file = new File(Common.LOCAL_DIR + File.separator + "copy" + file.getName());
         }
         channel.pipeline().remove(CommandInboundHandler.class);
         channel.pipeline().remove(ObjectDecoder.class);

@@ -31,7 +31,7 @@ public class UploadFileCommand implements CommandService {
         try {
             channel.pipeline().remove(CommandInboundHandler.class);
             channel.pipeline().addLast(new ChunkedWriteHandler());
-            ChannelFuture future = channel.writeAndFlush(new ChunkedFile(new File(actualCommandParts)));
+            ChannelFuture future = channel.writeAndFlush(new ChunkedFile(new File(Common.LOCAL_DIR+File.separator+actualCommandParts)));
             future.addListener((ChannelFutureListener) channelFuture -> {
                 System.out.println("Finish upload");
                 channel.pipeline().addLast(new CommandInboundHandler());

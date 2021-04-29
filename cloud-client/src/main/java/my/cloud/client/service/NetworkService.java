@@ -7,4 +7,6 @@ public interface NetworkService {
     void start();
 
     SocketChannel getChannel();
+
+    void shutdown();
 }

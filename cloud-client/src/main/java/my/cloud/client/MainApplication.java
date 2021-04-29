@@ -5,7 +5,6 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import javafx.stage.WindowEvent;
 import my.cloud.client.controller.MainController;
 
 public class MainApplication extends Application {
@@ -15,8 +14,8 @@ public class MainApplication extends Application {
         Parent parent = loader.load();
         primaryStage.setScene(new Scene(parent));
         primaryStage.setTitle("Cloud project");
-//        MainController controller = loader.getController();
-//        primaryStage.setOnCloseRequest((event) -> controller.shutdown());
+        MainController controller = loader.getController();
+        primaryStage.setOnCloseRequest((event) -> controller.shutdown());
         primaryStage.show();
     }
 }
