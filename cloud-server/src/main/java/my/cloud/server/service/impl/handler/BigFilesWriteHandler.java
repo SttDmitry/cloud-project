@@ -42,7 +42,7 @@ public class BigFilesWriteHandler extends SimpleChannelInboundHandler<ByteBuf> {
                 os.write(byteBuf.readByte());
             }
             System.out.println("fileSpace = " + fileSpace + " , fileToWrite.length() = " + fileToWrite.length());
-            if (Math.abs(fileSpace - fileToWrite.length()) <= 4096) {
+            if (Math.abs(fileSpace - fileToWrite.length()) <= fileSpace / 200) {
                 System.out.println("Finish upload");
                 ctx.pipeline().addLast(new ObjectEncoder());
                 ctx.pipeline().addLast(new ObjectDecoder(150*1024*1024,ClassResolvers.cacheDisabled(null)));

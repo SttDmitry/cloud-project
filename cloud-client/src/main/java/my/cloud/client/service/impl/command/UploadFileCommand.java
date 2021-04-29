@@ -22,7 +22,7 @@ public class UploadFileCommand implements CommandService {
         if (actualCommandParts.length != requirementCountCommandParts) {
             throw new IllegalArgumentException("Command \"" + getCommand() + "\" is not correct");
         }
-        channelSetForUploading(channel,actualCommandParts[1]);
+        channelSetForUploading(channel, actualCommandParts[1]);
 
         return actualCommandParts[1];
     }
@@ -31,7 +31,7 @@ public class UploadFileCommand implements CommandService {
         try {
             channel.pipeline().remove(CommandInboundHandler.class);
             channel.pipeline().addLast(new ChunkedWriteHandler());
-            ChannelFuture future = channel.writeAndFlush(new ChunkedFile(new File(Common.LOCAL_DIR+File.separator+actualCommandParts)));
+            ChannelFuture future = channel.writeAndFlush(new ChunkedFile(new File(Common.LOCAL_DIR + File.separator + actualCommandParts)));
             future.addListener((ChannelFutureListener) channelFuture -> {
                 System.out.println("Finish upload");
                 channel.pipeline().addLast(new CommandInboundHandler());

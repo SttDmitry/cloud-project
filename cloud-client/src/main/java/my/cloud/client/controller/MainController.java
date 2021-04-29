@@ -51,7 +51,7 @@ public class MainController implements Initializable {
             ChannelFuture future = networkService.getChannel().newSucceededFuture();
             try {
                 waiting();
-                future.await();
+                future.await().isDone();
                 waitFinished();
                 refreshFilesLists();
             } catch (InterruptedException e) {
@@ -68,7 +68,7 @@ public class MainController implements Initializable {
             ChannelFuture future = networkService.getChannel().newSucceededFuture();
             try {
                 waiting();
-                future.await();
+                future.await().isDone();
                 waitFinished();
                 refreshFilesLists();
             } catch (InterruptedException e) {
@@ -133,8 +133,8 @@ public class MainController implements Initializable {
         try (BufferedReader reader = new BufferedReader(new FileReader(Common.FILES_LIST.toString()))) {
             String resultCommand = reader.readLine();
             String[] listOfFiles = resultCommand.split(", ");
-                cloudFilesList.getItems().clear();
-                cloudFilesList.getItems().addAll(listOfFiles);
+            cloudFilesList.getItems().clear();
+            cloudFilesList.getItems().addAll(listOfFiles);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -142,19 +142,23 @@ public class MainController implements Initializable {
 
     public void waiting() {
         if (stage != null) {
-                stage.setOpacity(0.1f);
-                localFilesList.setDisable(true);
-                cloudFilesList.setDisable(true);
-                downButton.setDisable(true);
-                uplButton.setDisable(true);
+            stage.setOpacity(0.1f);
+            localFilesList.setDisable(true);
+            cloudFilesList.setDisable(true);
+            cloudFilesList.setMouseTransparent(true);
+            localFilesList.setMouseTransparent(true);
+            downButton.setDisable(true);
+            uplButton.setDisable(true);
         }
     }
 
     public void waitFinished() {
         if (stage != null) {
-                stage.setOpacity(1f);
-                localFilesList.setDisable(false);
-                cloudFilesList.setDisable(false);
+            stage.setOpacity(1f);
+            localFilesList.setDisable(false);
+            cloudFilesList.setDisable(false);
+            cloudFilesList.setMouseTransparent(false);
+            localFilesList.setMouseTransparent(false);
         }
     }
 
