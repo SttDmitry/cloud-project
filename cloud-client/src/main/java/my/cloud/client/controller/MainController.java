@@ -1,18 +1,20 @@
 package my.cloud.client.controller;
 
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelFutureListener;
-import io.netty.handler.stream.ChunkedFile;
-import io.netty.handler.stream.ChunkedWriteHandler;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
-import javafx.scene.input.MouseEvent;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import my.cloud.client.factory.Factory;
 import my.cloud.client.service.NetworkService;
-import my.cloud.client.service.impl.handler.CommandInboundHandler;
+import my.cloud.common.Common;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -21,6 +23,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.ResourceBundle;
 
 public class MainController implements Initializable {
@@ -31,66 +34,47 @@ public class MainController implements Initializable {
     public Button downButton;
     public TextField localPath;
     public TextField cloudPath;
-    private File cloudDir = new File(System.getenv("LOCALAPPDATA")+"//CloudProject");
-    private File localDir = new File(".");
 
     public NetworkService networkService;
 
-    private Map<String, File> localFiles = new HashMap<>();
+    private Stage stage;
+
+    private final Map<String, File> localFiles = new HashMap<>();
 
 
+    public void uploadFile() {
+        if (!localFilesList.getItems().isEmpty() && !(localFilesList.getSelectionModel().getSelectedItem() == null)) {
+//            System.out.println(localFiles.get(localFilesList.getSelectionModel().getSelectedItem()));
+            networkService.getChannel().writeAndFlush(Common.UPLOAD + " " + localFiles.get(localFilesList.getSelectionModel().getSelectedItem()).length() + " " + localFilesList.getSelectionModel().getSelectedItem());
 
-
-    public void uploadFile(ActionEvent actionEvent) {
-        if(!localFilesList.getItems().isEmpty() && !(localFilesList.getSelectionModel().getSelectedItem() == null)) {
-            try {
-                System.out.println(localFiles.get(localFilesList.getSelectionModel().getSelectedItem()));
-                networkService.getChannel().writeAndFlush("upload "+localFiles.get(localFilesList.getSelectionModel().getSelectedItem()).getTotalSpace()+" "+localFilesList.getSelectionModel().getSelectedItem());
-                networkService.getChannel().pipeline().remove(CommandInboundHandler.class);
-                networkService.getChannel().pipeline().addLast(new ChunkedWriteHandler());
-                ChannelFuture future = networkService.getChannel().writeAndFlush(new ChunkedFile(localFiles.get(localFilesList.getSelectionModel().getSelectedItem())));
-                //stage.hideAll + show wait
-                future.addListener((ChannelFutureListener) channelFuture -> {
-                    networkService.getChannel().pipeline().addLast(new CommandInboundHandler());
-                    networkService.getChannel().pipeline().remove(ChunkedWriteHandler.class);
-                    System.out.println("Finish write");
-                });
-
-                    Thread.sleep(300);
+            Platform.runLater(()-> {
                 refreshFilesLists();
-                // stage.showAll + close wait
-            } catch (IOException | InterruptedException e) {
-                e.printStackTrace();
-            }
+            });
+            // stage.showAll + close wait
         }
 
     }
 
-    public void downloadFile(ActionEvent actionEvent) {
-        if(!cloudFilesList.getItems().isEmpty() && !(cloudFilesList.getSelectionModel().getSelectedItem() == null)) {
-
-                System.out.println(localFiles.get(localFilesList.getSelectionModel().getSelectedItem()));
-                networkService.getChannel().writeAndFlush("download "+ localDir+"//"+cloudFilesList.getSelectionModel().getSelectedItem());
-                //stage.hideAll + show wait
-                // stage.showAll + close wait
-            try {
-                Thread.sleep(300);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            refreshFilesLists();
-
+    public void downloadFile() {
+        if (!cloudFilesList.getItems().isEmpty() && !(cloudFilesList.getSelectionModel().getSelectedItem() == null)) {
+            System.out.println(localFiles.get(localFilesList.getSelectionModel().getSelectedItem()));
+            networkService.getChannel().writeAndFlush(Common.DOWNLOAD + " " + Common.LOCAL_DIR + File.separator + cloudFilesList.getSelectionModel().getSelectedItem());
+            //stage.hideAll + show wait
+            // stage.showAll + close wait
+            Platform.runLater(()-> {
+                refreshFilesLists();
+            });
         }
     }
 
 
-    public void localClick(MouseEvent mouseEvent) {
+    public void localClick() {
         downButton.setDisable(true);
         uplButton.setDisable(false);
         cloudFilesList.getSelectionModel().select(-1);
     }
 
-    public void cloudClick(MouseEvent mouseEvent) {
+    public void cloudClick() {
         downButton.setDisable(false);
         uplButton.setDisable(true);
         localFilesList.getSelectionModel().select(-1);
@@ -98,40 +82,42 @@ public class MainController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        Platform.runLater(()->{
+            stage = (Stage) localPath.getScene().getWindow();
+        });
         networkService = Factory.getNetworkService();
         networkService.start();
-
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        long mil = System.currentTimeMillis();
+        while (System.currentTimeMillis() - mil < 1000){
+            waiting();}
+        waitFinished();
         System.out.println(networkService.getChannel());
         downButton.setDisable(true);
         uplButton.setDisable(true);
+        cloudPath.setText(new File(Common.CLOUD_DIR.toString()).getName());
+        localPath.setText(new File(Common.LOCAL_DIR.toString()).getName());
         refreshFilesLists();
-        cloudPath.setText(cloudDir.getName());
-        localPath.setText(localDir.getName());
     }
 
 
-
-    private void refreshFilesLists(){
+    private void refreshFilesLists() {
+        long mil = System.currentTimeMillis();
+        while (System.currentTimeMillis() - mil < 300){
+            waiting();}
+        waitFinished();
         localFilesList.getItems().clear();
         cloudFilesList.getItems().clear();
-        networkService.getChannel().writeAndFlush("ls .");
-        for (File childFile : localDir.listFiles()) {
-            if (childFile.isFile()){
+        networkService.getChannel().writeAndFlush(Common.LS.toString());
+        for (File childFile : Objects.requireNonNull(new File(Common.LOCAL_DIR.toString()).listFiles())) {
+            if (childFile.isFile()) {
                 localFiles.put(childFile.getName(), childFile);
                 localFilesList.getItems().add(childFile.getName());
             }
         }
-        try {
-            Thread.sleep(500);}
-        catch (InterruptedException e){
-            e.printStackTrace();
-        }
-        try (BufferedReader reader = new BufferedReader(new FileReader("./Files/filesList.txt"))) {
+        while (System.currentTimeMillis() - mil < 1000){
+        waiting();}
+        waitFinished();
+        try (BufferedReader reader = new BufferedReader(new FileReader(Common.FILES_LIST.toString()))) {
             String resultCommand = reader.readLine();
             String[] listOfFiles = resultCommand.split(", ");
             cloudFilesList.getItems().clear();
@@ -140,4 +126,18 @@ public class MainController implements Initializable {
             e.printStackTrace();
         }
     }
+
+    public void waiting() {
+        if (stage != null) {
+            stage.setOpacity(0.1f);
+        }
+    }
+
+    public void waitFinished(){
+        if (stage != null) {
+            stage.setOpacity(1f);
+        }
+    }
+
+
 }

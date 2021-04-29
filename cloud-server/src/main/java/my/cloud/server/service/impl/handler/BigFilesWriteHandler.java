@@ -15,21 +15,38 @@ import java.io.OutputStream;
 
 public class BigFilesWriteHandler extends SimpleChannelInboundHandler<ByteBuf> {
 
-    private File fileToWrite;
-    private long fileSpace;
+    private final File fileToWrite;
+    private final long fileSpace;
 
-    public BigFilesWriteHandler (File ftw, long l){
+    public BigFilesWriteHandler(File ftw, long l) {
         this.fileToWrite = ftw;
         this.fileSpace = l;
     }
 
 
     @Override
-    protected void channelRead0(ChannelHandlerContext ctx, ByteBuf bb) throws Exception {
+    protected void channelRead0(ChannelHandlerContext ctx, ByteBuf bb) {
         System.out.println(fileToWrite);
 
         ByteBuf byteBuf = bb.retain();
 
+        outputFileWriter(byteBuf);
+
+        if (fileSpace - fileToWrite.length() < 65536) {
+            System.out.println("Finish upload server");
+            ctx.pipeline().addLast(new ObjectEncoder());
+            ctx.pipeline().addLast(new ObjectDecoder(ClassResolvers.cacheDisabled(null)));
+            ctx.pipeline().addLast(new CommandInboundHandler());
+            ctx.pipeline().remove(ChunkedWriteHandler.class);
+            ctx.pipeline().remove(BigFilesWriteHandler.class);
+            ctx.fireChannelInactive();
+        }
+
+        byteBuf.release();
+
+    }
+
+    private void outputFileWriter(ByteBuf byteBuf) {
         try (OutputStream os = new BufferedOutputStream(new FileOutputStream(fileToWrite, true))) {
             while (byteBuf.isReadable()) {
                 os.write(byteBuf.readByte());
@@ -37,15 +54,5 @@ public class BigFilesWriteHandler extends SimpleChannelInboundHandler<ByteBuf> {
         } catch (Exception ex) {
             ex.printStackTrace();
         }
-
-        byteBuf.release();
-
-        if (fileToWrite.getTotalSpace() == fileSpace){
-            ctx.pipeline().addLast(new ObjectEncoder());
-            ctx.pipeline().addLast(new ObjectDecoder(ClassResolvers.cacheDisabled(null)));
-            ctx.pipeline().addLast(new CommandInboundHandler());
-            ctx.pipeline().remove(ChunkedWriteHandler.class);
-            ctx.pipeline().remove(BigFilesWriteHandler.class);}
-
     }
 }

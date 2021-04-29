@@ -21,7 +21,7 @@ public class NettyServerService implements ServerService {
     static final int PORT = 8189;
 
     @Override
-    public void startServer() throws Exception {
+    public void startServer() {
 
         EventLoopGroup bossGroup = new NioEventLoopGroup(1);
         EventLoopGroup workerGroup = new NioEventLoopGroup();

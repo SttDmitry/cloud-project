@@ -2,7 +2,7 @@ package my.cloud.server.service.impl.handler;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
-import my.cloud.server.Factory.Factory;
+import my.cloud.server.factory.Factory;
 import my.cloud.server.service.CommandDictionaryService;
 
 public class CommandInboundHandler extends SimpleChannelInboundHandler<Object> {

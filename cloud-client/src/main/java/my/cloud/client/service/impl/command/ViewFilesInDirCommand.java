@@ -2,6 +2,7 @@ package my.cloud.client.service.impl.command;
 
 import io.netty.channel.Channel;
 import my.cloud.client.service.CommandService;
+import my.cloud.common.Common;
 
 import java.io.*;
 
@@ -15,44 +16,36 @@ public class ViewFilesInDirCommand implements CommandService {
         if (actualCommandParts.length != requirementCountCommandParts) {
             throw new IllegalArgumentException("Command \"" + getCommand() + "\" is not correct");
         }
-        File file = new File("./Files/filesList.txt");
+        File file = new File(Common.FILES_LIST.toString());
         if (!file.exists()) {
-            try {
-                file.getParentFile().mkdirs();
-                file.createNewFile();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            file.getParentFile().mkdirs();
+            fileCreate(file);
         }
 
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, false))){
-            writer.write(actualCommandParts[1]);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        listToFileWriter(actualCommandParts[1], file);
 
         return actualCommandParts[1];
     }
 
-//    private String process(String dirPath) {
-//        StringBuilder sb = new StringBuilder();
-//        if (!cloudDir.exists()) {
-//            cloudDir.mkdirs();
-//        } else {
-//            for (File childFile : cloudDir.listFiles()) {
-//                if (childFile.isFile()){
-//                    sb.append(childFile.getName()).append(", ");
-//                }
-//            }
-//        }
-//        sb.setLength(sb.length()-2);
-//
-//        return "ls "+sb.toString();
-//    }
+    private void fileCreate(File file) {
+        try {
+            file.createNewFile();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void listToFileWriter(String actualCommandPart, File file) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, false))) {
+            writer.write(actualCommandPart);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
 
     @Override
     public String getCommand() {
-        return "ls";
+        return Common.LS.toString();
     }
 }

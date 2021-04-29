@@ -1,4 +1,4 @@
-package my.cloud.server.Factory;
+package my.cloud.server.factory;
 
 import my.cloud.server.service.CommandDictionaryService;
 import my.cloud.server.service.CommandService;
