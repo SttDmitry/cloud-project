@@ -15,7 +15,7 @@ import java.util.List;
 public class Factory {
 
     public static NetworkService getNetworkService() {
-        return new NettyClientService();
+        return NettyClientService.getInstance();
     }
 
     public static CommandDictionaryService getCommandDirectoryService() {
@@ -23,7 +23,7 @@ public class Factory {
     }
 
     public static List<CommandService> getCommandServices() {
-        return Arrays.asList(new ViewFilesInDirCommand(), new DownloadFileCommand(), new UploadFileCommand());
+        return Arrays.asList(new ViewFilesInDirCommand(), new DownloadFileCommand(getNetworkService()), new UploadFileCommand(getNetworkService()));
     }
 
 }

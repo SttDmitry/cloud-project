@@ -6,6 +6,7 @@ import io.netty.channel.ChannelFutureListener;
 import io.netty.handler.stream.ChunkedFile;
 import io.netty.handler.stream.ChunkedWriteHandler;
 import my.cloud.client.service.CommandService;
+import my.cloud.client.service.NetworkService;
 import my.cloud.client.service.impl.handler.CommandInboundHandler;
 import my.cloud.common.Common;
 
@@ -13,6 +14,12 @@ import java.io.File;
 import java.io.IOException;
 
 public class UploadFileCommand implements CommandService {
+
+    private NetworkService impl;
+
+    public UploadFileCommand(NetworkService impl) {
+        this.impl = impl;
+    }
 
     @Override
     public String processCommand(String command, Channel channel) {
@@ -36,6 +43,8 @@ public class UploadFileCommand implements CommandService {
                 System.out.println("Finish upload");
                 channel.pipeline().addLast(new CommandInboundHandler());
                 channel.pipeline().remove(ChunkedWriteHandler.class);
+                impl.setFileTransactionFinished(true);
+
             });
         } catch (IOException e) {
             e.printStackTrace();

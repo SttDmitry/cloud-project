@@ -17,6 +17,18 @@ public class NettyClientService implements NetworkService {
 
     private static final String HOST = "localhost";
     private static final int PORT = 8189;
+    private static NettyClientService instance;
+
+    private boolean fileTransactionFinished = false;
+
+    public static NetworkService getInstance() {
+        if (instance == null) {
+            instance = new NettyClientService();
+        }
+        return instance;
+    }
+
+    NettyClientService(){}
 
     private SocketChannel channel;
 
@@ -43,7 +55,7 @@ public class NettyClientService implements NetworkService {
                                 channel = socketChannel;
                                 socketChannel.pipeline().addLast(
                                         new ObjectEncoder(),
-                                        new ObjectDecoder(150*1024*1024,ClassResolvers.cacheDisabled(null)),
+                                        new ObjectDecoder(150 * 1024 * 1024, ClassResolvers.cacheDisabled(null)),
                                         new CommandInboundHandler()
                                 );
                             }
@@ -57,5 +69,15 @@ public class NettyClientService implements NetworkService {
             }
         });
         t.start();
+    }
+
+    @Override
+    public void setFileTransactionFinished(boolean isFinished) {
+        fileTransactionFinished = isFinished;
+    }
+
+    @Override
+    public boolean getFileTransactionFinished() {
+        return fileTransactionFinished;
     }
 }

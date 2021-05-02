@@ -5,6 +5,7 @@ import io.netty.handler.codec.serialization.ObjectDecoder;
 import io.netty.handler.codec.serialization.ObjectEncoder;
 import io.netty.handler.stream.ChunkedWriteHandler;
 import my.cloud.client.service.CommandService;
+import my.cloud.client.service.NetworkService;
 import my.cloud.client.service.impl.handler.BigFilesWriteHandler;
 import my.cloud.client.service.impl.handler.CommandInboundHandler;
 import my.cloud.common.Common;
@@ -12,6 +13,12 @@ import my.cloud.common.Common;
 import java.io.File;
 
 public class DownloadFileCommand implements CommandService {
+
+    private NetworkService impl;
+
+    public DownloadFileCommand(NetworkService impl) {
+        this.impl = impl;
+    }
 
     @Override
     public String processCommand(String command, Channel channel) {
@@ -29,7 +36,7 @@ public class DownloadFileCommand implements CommandService {
         channel.pipeline().remove(ObjectDecoder.class);
         channel.pipeline().remove(ObjectEncoder.class);
         channel.pipeline().addLast(new ChunkedWriteHandler());
-        channel.pipeline().addLast(new BigFilesWriteHandler(file, Long.parseLong(actualCommandParts[1])));
+        channel.pipeline().addLast(new BigFilesWriteHandler(file, Long.parseLong(actualCommandParts[1]), impl));
 
         return actualCommandParts[1];
     }

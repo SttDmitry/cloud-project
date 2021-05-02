@@ -2,18 +2,12 @@ package my.cloud.client.controller;
 
 import io.netty.channel.ChannelFuture;
 import javafx.application.Platform;
-import javafx.event.ActionEvent;
-import javafx.fxml.FXMLLoader;
+import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
-import javafx.scene.input.MouseEvent;
-import javafx.stage.Modality;
 import javafx.stage.Stage;
-import javafx.stage.StageStyle;
 import my.cloud.client.factory.Factory;
 import my.cloud.client.service.NetworkService;
 import my.cloud.common.Common;
@@ -29,15 +23,20 @@ import java.util.Objects;
 import java.util.ResourceBundle;
 
 public class MainController implements Initializable {
+    @FXML
+    private ListView<String> localFilesList;
+    @FXML
+    private ListView<String> cloudFilesList;
+    @FXML
+    private Button uplButton;
+    @FXML
+    private Button downButton;
+    @FXML
+    private TextField localPath;
+    @FXML
+    private TextField cloudPath;
 
-    public ListView<String> localFilesList;
-    public ListView<String> cloudFilesList;
-    public Button uplButton;
-    public Button downButton;
-    public TextField localPath;
-    public TextField cloudPath;
-
-    public NetworkService networkService;
+    private NetworkService networkService;
 
     private Stage stage;
 
@@ -48,15 +47,12 @@ public class MainController implements Initializable {
         if (!localFilesList.getItems().isEmpty() && !(localFilesList.getSelectionModel().getSelectedItem() == null)) {
             System.out.println(localFiles.get(localFilesList.getSelectionModel().getSelectedItem()));
             networkService.getChannel().writeAndFlush(Common.UPLOAD + " " + localFiles.get(localFilesList.getSelectionModel().getSelectedItem()).length() + " " + localFilesList.getSelectionModel().getSelectedItem());
-            ChannelFuture future = networkService.getChannel().newSucceededFuture();
-            try {
-                waiting();
-                future.await().isDone();
-                waitFinished();
+            networkService.setFileTransactionFinished(false);
+                while (!networkService.getFileTransactionFinished()) {
+                    waiting();
+                }
+                waitingFinished();
                 refreshFilesLists();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
         }
 
     }
@@ -65,15 +61,12 @@ public class MainController implements Initializable {
         if (!cloudFilesList.getItems().isEmpty() && !(cloudFilesList.getSelectionModel().getSelectedItem() == null)) {
             System.out.println(Common.DOWNLOAD + " " + Common.LOCAL_DIR + File.separator + cloudFilesList.getSelectionModel().getSelectedItem());
             networkService.getChannel().writeAndFlush(Common.DOWNLOAD + " " + Common.LOCAL_DIR + File.separator + cloudFilesList.getSelectionModel().getSelectedItem());
-            ChannelFuture future = networkService.getChannel().newSucceededFuture();
-            try {
-                waiting();
-                future.await().isDone();
-                waitFinished();
+            networkService.setFileTransactionFinished(false);
+                while (!networkService.getFileTransactionFinished()) {
+                    waiting();
+                }
+                waitingFinished();
                 refreshFilesLists();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
         }
     }
 
@@ -101,7 +94,7 @@ public class MainController implements Initializable {
         while (System.currentTimeMillis() - mil < 1000) {
             waiting();
         }
-        waitFinished();
+        waitingFinished();
         System.out.println(networkService.getChannel());
         downButton.setDisable(true);
         uplButton.setDisable(true);
@@ -116,7 +109,7 @@ public class MainController implements Initializable {
         while (System.currentTimeMillis() - mil < 300) {
             waiting();
         }
-        waitFinished();
+        waitingFinished();
         localFilesList.getItems().clear();
         cloudFilesList.getItems().clear();
         networkService.getChannel().writeAndFlush(Common.LS.toString());
@@ -129,7 +122,7 @@ public class MainController implements Initializable {
         while (System.currentTimeMillis() - mil < 1000) {
             waiting();
         }
-        waitFinished();
+        waitingFinished();
         try (BufferedReader reader = new BufferedReader(new FileReader(Common.FILES_LIST.toString()))) {
             String resultCommand = reader.readLine();
             String[] listOfFiles = resultCommand.split(", ");
@@ -142,23 +135,24 @@ public class MainController implements Initializable {
 
     public void waiting() {
         if (stage != null) {
-            stage.setOpacity(0.1f);
-            localFilesList.setDisable(true);
-            cloudFilesList.setDisable(true);
-            cloudFilesList.setMouseTransparent(true);
-            localFilesList.setMouseTransparent(true);
-            downButton.setDisable(true);
-            uplButton.setDisable(true);
+                stage.setOpacity(0.1f);
+                localFilesList.setDisable(true);
+                cloudFilesList.setDisable(true);
+                cloudFilesList.setMouseTransparent(true);
+                localFilesList.setMouseTransparent(true);
+                downButton.setDisable(true);
+                uplButton.setDisable(true);
+
         }
     }
 
-    public void waitFinished() {
+    public void waitingFinished() {
         if (stage != null) {
-            stage.setOpacity(1f);
-            localFilesList.setDisable(false);
-            cloudFilesList.setDisable(false);
-            cloudFilesList.setMouseTransparent(false);
-            localFilesList.setMouseTransparent(false);
+                stage.setOpacity(1f);
+                localFilesList.setDisable(false);
+                cloudFilesList.setDisable(false);
+                cloudFilesList.setMouseTransparent(false);
+                localFilesList.setMouseTransparent(false);
         }
     }
 

@@ -9,4 +9,8 @@ public interface NetworkService {
     SocketChannel getChannel();
 
     void shutdown();
+
+    void setFileTransactionFinished(boolean isFinished);
+
+    boolean getFileTransactionFinished();
 }

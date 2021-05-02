@@ -8,6 +8,7 @@ import io.netty.handler.codec.serialization.ObjectDecoder;
 import io.netty.handler.codec.serialization.ObjectEncoder;
 import io.netty.handler.stream.ChunkedNioFile;
 import io.netty.handler.stream.ChunkedWriteHandler;
+import my.cloud.client.service.NetworkService;
 
 import java.io.*;
 
@@ -15,11 +16,13 @@ public class BigFilesWriteHandler extends SimpleChannelInboundHandler<ByteBuf> {
 
     private final File fileToWrite;
     private final long fileSpace;
+    private final NetworkService impl;
 
 
-    public BigFilesWriteHandler(File ftw, long fileSpace) {
+    public BigFilesWriteHandler(File ftw, long fileSpace, NetworkService impl) {
         this.fileToWrite = ftw;
         this.fileSpace = fileSpace;
+        this.impl = impl;
     }
 
     @Override
@@ -47,6 +50,7 @@ public class BigFilesWriteHandler extends SimpleChannelInboundHandler<ByteBuf> {
                 ctx.pipeline().addLast(new CommandInboundHandler());
                 ctx.pipeline().remove(BigFilesWriteHandler.class);
                 ctx.pipeline().remove(ChunkedWriteHandler.class);
+                impl.setFileTransactionFinished(true);
             }
         } catch (IOException ex) {
             ex.printStackTrace();
