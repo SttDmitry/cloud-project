@@ -17,30 +17,28 @@ public class NettyClientService implements NetworkService {
 
     private static final String HOST = "localhost";
     private static final int PORT = 8189;
+    private static NettyClientService instance;
 
-    protected boolean uploadFinish = false;
-    protected boolean downloadFinish = false;
+    private boolean fileTransactionFinished = false;
 
-    public boolean isUploadFinish() {
-        return uploadFinish;
+    public static NetworkService getInstance() {
+        if (instance == null) {
+            instance = new NettyClientService();
+        }
+        return instance;
     }
 
-    public void setUploadFinish(boolean uploadFinish) {
-        this.uploadFinish = uploadFinish;
-    }
-
-    public boolean isDownloadFinish() {
-        return downloadFinish;
-    }
-
-    public void setDownloadFinish(boolean downloadFinish) {
-        this.downloadFinish = downloadFinish;
-    }
+    NettyClientService(){}
 
     private SocketChannel channel;
 
     public SocketChannel getChannel() {
         return channel;
+    }
+
+    @Override
+    public void shutdown() {
+        channel.close();
     }
 
 
@@ -57,7 +55,7 @@ public class NettyClientService implements NetworkService {
                                 channel = socketChannel;
                                 socketChannel.pipeline().addLast(
                                         new ObjectEncoder(),
-                                        new ObjectDecoder(ClassResolvers.cacheDisabled(null)),
+                                        new ObjectDecoder(150 * 1024 * 1024, ClassResolvers.cacheDisabled(null)),
                                         new CommandInboundHandler()
                                 );
                             }
@@ -71,5 +69,15 @@ public class NettyClientService implements NetworkService {
             }
         });
         t.start();
+    }
+
+    @Override
+    public void setFileTransactionFinished(boolean isFinished) {
+        fileTransactionFinished = isFinished;
+    }
+
+    @Override
+    public boolean getFileTransactionFinished() {
+        return fileTransactionFinished;
     }
 }

@@ -15,7 +15,7 @@ import java.util.List;
 public class Factory {
 
     public static ServerService getServerService() {
-        return new NettyServerService();
+        return NettyServerService.getInstance();
     }
 
     public static CommandDictionaryService getCommandDirectoryService() {

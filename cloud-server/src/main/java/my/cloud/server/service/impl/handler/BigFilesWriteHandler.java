@@ -7,6 +7,7 @@ import io.netty.handler.codec.serialization.ClassResolvers;
 import io.netty.handler.codec.serialization.ObjectDecoder;
 import io.netty.handler.codec.serialization.ObjectEncoder;
 import io.netty.handler.stream.ChunkedWriteHandler;
+import my.cloud.common.Common;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -30,26 +31,25 @@ public class BigFilesWriteHandler extends SimpleChannelInboundHandler<ByteBuf> {
 
         ByteBuf byteBuf = bb.retain();
 
-        outputFileWriter(byteBuf);
-
-        if (fileSpace - fileToWrite.length() < 65536) {
-            System.out.println("Finish upload server");
-            ctx.pipeline().addLast(new ObjectEncoder());
-            ctx.pipeline().addLast(new ObjectDecoder(ClassResolvers.cacheDisabled(null)));
-            ctx.pipeline().addLast(new CommandInboundHandler());
-            ctx.pipeline().remove(ChunkedWriteHandler.class);
-            ctx.pipeline().remove(BigFilesWriteHandler.class);
-            ctx.fireChannelInactive();
-        }
+        outputFileWriter(ctx, byteBuf);
 
         byteBuf.release();
 
     }
 
-    private void outputFileWriter(ByteBuf byteBuf) {
+    private void outputFileWriter(ChannelHandlerContext ctx, ByteBuf byteBuf) {
         try (OutputStream os = new BufferedOutputStream(new FileOutputStream(fileToWrite, true))) {
             while (byteBuf.isReadable()) {
                 os.write(byteBuf.readByte());
+            }
+            System.out.println("fileSpace = " + fileSpace + " , fileToWrite.length() = " + fileToWrite.length());
+            if (Math.abs(fileSpace - fileToWrite.length()) <= fileSpace / 200) {
+                System.out.println("Finish upload");
+                ctx.pipeline().addLast(new ObjectEncoder());
+                ctx.pipeline().addLast(new ObjectDecoder(150*1024*1024,ClassResolvers.cacheDisabled(null)));
+                ctx.pipeline().addLast(new CommandInboundHandler());
+                ctx.pipeline().remove(BigFilesWriteHandler.class);
+                ctx.pipeline().remove(ChunkedWriteHandler.class);
             }
         } catch (Exception ex) {
             ex.printStackTrace();

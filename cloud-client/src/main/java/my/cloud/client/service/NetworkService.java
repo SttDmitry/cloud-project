@@ -7,4 +7,10 @@ public interface NetworkService {
     void start();
 
     SocketChannel getChannel();
+
+    void shutdown();
+
+    void setFileTransactionFinished(boolean isFinished);
+
+    boolean getFileTransactionFinished();
 }

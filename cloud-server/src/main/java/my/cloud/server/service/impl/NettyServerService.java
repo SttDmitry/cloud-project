@@ -19,6 +19,16 @@ import my.cloud.server.service.impl.handler.CommandInboundHandler;
 public class NettyServerService implements ServerService {
 
     static final int PORT = 8189;
+    private static NettyServerService instance;
+
+    public static ServerService getInstance() {
+        if (instance == null) {
+            instance = new NettyServerService();
+        }
+        return instance;
+    }
+
+    NettyServerService(){}
 
     @Override
     public void startServer() {
@@ -37,7 +47,7 @@ public class NettyServerService implements ServerService {
                         protected void initChannel(SocketChannel channel) {
                             channel.pipeline().addLast(
                                     new ObjectEncoder(),
-                                    new ObjectDecoder(ClassResolvers.cacheDisabled(null)),
+                                    new ObjectDecoder(150*1024*1024,ClassResolvers.cacheDisabled(null)),
                                     new CommandInboundHandler()
                             );
 

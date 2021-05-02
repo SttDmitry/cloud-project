@@ -39,8 +39,8 @@ public class DownloadFileCommand implements CommandService {
             ChannelFuture future = channel.writeAndFlush(new ChunkedFile(newFile));
             future.addListener((ChannelFutureListener) channelFuture -> {
                 System.out.println("Finish download server");
-                channel.pipeline().addLast(new CommandInboundHandler());
-                channel.pipeline().remove(ChunkedWriteHandler.class);
+                future.channel().pipeline().addLast(new CommandInboundHandler());
+                future.channel().pipeline().remove(ChunkedWriteHandler.class);
             });
         } catch (IOException e) {
             e.printStackTrace();
