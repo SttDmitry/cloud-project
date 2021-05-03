@@ -3,11 +3,16 @@ package my.cloud.client.controller;
 import io.netty.channel.ChannelFuture;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import my.cloud.client.factory.Factory;
 import my.cloud.client.service.NetworkService;
 import my.cloud.common.Common;
@@ -39,6 +44,9 @@ public class MainController implements Initializable {
     private NetworkService networkService;
 
     private Stage stage;
+    private Stage authStage;
+
+    private AuthController authController;
 
     private final Map<String, File> localFiles = new HashMap<>();
 
@@ -90,6 +98,10 @@ public class MainController implements Initializable {
         });
         networkService = Factory.getNetworkService();
         networkService.start();
+        Platform.runLater(()->{
+            createLoginWindow();
+            authStage.show();
+        });
         long mil = System.currentTimeMillis();
         while (System.currentTimeMillis() - mil < 1000) {
             waiting();
@@ -100,7 +112,6 @@ public class MainController implements Initializable {
         uplButton.setDisable(true);
         cloudPath.setText(new File(Common.CLOUD_DIR.toString()).getName());
         localPath.setText(new File(Common.LOCAL_DIR.toString()).getName());
-        refreshFilesLists();
     }
 
 
@@ -156,11 +167,39 @@ public class MainController implements Initializable {
         }
     }
 
+    private void createLoginWindow() {
+        try {
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/authView.fxml"));
+            Parent root = fxmlLoader.load();
+            authStage = new Stage();
+            authStage.setTitle("Log in");
+            authStage.setScene(new Scene(root, 300, 210));
+            authController = fxmlLoader.getController();
+            authController.setController(this);
+            authStage.initModality(Modality.APPLICATION_MODAL);
+            authStage.initStyle(StageStyle.UTILITY);
+            stage.hide();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     public void shutdown() {
         networkService.shutdown();
     }
 
-    public void refresh() {
-        refreshFilesLists();
+    public void tryToAuth(String login, String pass) {
+        networkService.getChannel().writeAndFlush(Common.AUTH+" "+login +" "+ pass);
+        while (networkService.getAuthResult() == null) {
+            waiting();
+        }
+        String [] result = networkService.getAuthResult().split("\\s", 2);
+        if (result[0].equals("Success")) {
+            waitingFinished();
+            stage.show();
+            authStage.hide();
+            Platform.runLater(()->{cloudPath.setText(result[1]);});
+            refreshFilesLists();
+        }
     }
 }

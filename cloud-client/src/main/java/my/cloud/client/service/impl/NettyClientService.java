@@ -18,6 +18,7 @@ public class NettyClientService implements NetworkService {
     private static final String HOST = "localhost";
     private static final int PORT = 8189;
     private static NettyClientService instance;
+    private static String authResult;
 
     private boolean fileTransactionFinished = false;
 
@@ -79,5 +80,13 @@ public class NettyClientService implements NetworkService {
     @Override
     public boolean getFileTransactionFinished() {
         return fileTransactionFinished;
+    }
+
+    public String getAuthResult() {
+        return authResult;
+    }
+
+    public void setAuthResult(String authResult) {
+        NettyClientService.authResult = authResult;
     }
 }
