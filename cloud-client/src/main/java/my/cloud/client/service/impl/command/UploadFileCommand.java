@@ -3,6 +3,9 @@ package my.cloud.client.service.impl.command;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
+import io.netty.handler.codec.serialization.ClassResolvers;
+import io.netty.handler.codec.serialization.ObjectDecoder;
+import io.netty.handler.codec.serialization.ObjectEncoder;
 import io.netty.handler.stream.ChunkedFile;
 import io.netty.handler.stream.ChunkedWriteHandler;
 import my.cloud.client.service.CommandService;
@@ -36,15 +39,18 @@ public class UploadFileCommand implements CommandService {
 
     private void channelSetForUploading(Channel channel, String actualCommandParts) {
         try {
+            channel.pipeline().remove(ObjectDecoder.class);
+            channel.pipeline().remove(ObjectEncoder.class);
             channel.pipeline().remove(CommandInboundHandler.class);
             channel.pipeline().addLast(new ChunkedWriteHandler());
             ChannelFuture future = channel.writeAndFlush(new ChunkedFile(new File(Common.LOCAL_DIR + File.separator + actualCommandParts)));
             future.addListener((ChannelFutureListener) channelFuture -> {
                 System.out.println("Finish upload");
-                channel.pipeline().addLast(new CommandInboundHandler());
                 channel.pipeline().remove(ChunkedWriteHandler.class);
+                channel.pipeline().addLast(new ObjectEncoder());
+                channel.pipeline().addLast(new ObjectDecoder(150*1024*1024, ClassResolvers.cacheDisabled(null)));
+                channel.pipeline().addLast(new CommandInboundHandler());
                 impl.setFileTransactionFinished(true);
-
             });
         } catch (IOException e) {
             e.printStackTrace();

@@ -17,6 +17,7 @@ public class BigFilesWriteHandler extends SimpleChannelInboundHandler<ByteBuf> {
     private final File fileToWrite;
     private final long fileSpace;
     private final NetworkService impl;
+    private static boolean end = false;
 
 
     public BigFilesWriteHandler(File ftw, long fileSpace, NetworkService impl) {
@@ -31,7 +32,9 @@ public class BigFilesWriteHandler extends SimpleChannelInboundHandler<ByteBuf> {
 
         ByteBuf byteBuf = bb.retain();
 
-        outputFileWrite(ctx,byteBuf);
+        checkWriteEnd(ctx);
+
+        if (!end){outputFileWrite(ctx,byteBuf);}
 
         byteBuf.release();
 
@@ -43,17 +46,22 @@ public class BigFilesWriteHandler extends SimpleChannelInboundHandler<ByteBuf> {
                 os.write(byteBuf.readByte());
             }
             System.out.println("fileSpace = " + fileSpace + " , fileToWrite.length() = " + fileToWrite.length());
-            if (Math.abs(fileSpace - fileToWrite.length()) <= fileSpace / 200) {
-                System.out.println("Finish download");
-                ctx.pipeline().addLast(new ObjectEncoder());
-                ctx.pipeline().addLast(new ObjectDecoder(150*1024*1024,ClassResolvers.cacheDisabled(null)));
-                ctx.pipeline().addLast(new CommandInboundHandler());
-                ctx.pipeline().remove(BigFilesWriteHandler.class);
-                ctx.pipeline().remove(ChunkedWriteHandler.class);
-                impl.setFileTransactionFinished(true);
-            }
+            checkWriteEnd(ctx);
         } catch (IOException ex) {
             ex.printStackTrace();
+        }
+    }
+
+    private void checkWriteEnd(ChannelHandlerContext ctx) {
+        if (!end && (Math.abs(fileSpace - fileToWrite.length()) <= fileSpace / 200 || fileSpace < 1024 && fileSpace+fileToWrite.length()/3 > Math.abs(fileSpace - fileToWrite.length()))) {
+            System.out.println("Finish download");
+            ctx.pipeline().addLast(new ObjectEncoder());
+            ctx.pipeline().addLast(new ObjectDecoder(150*1024*1024,ClassResolvers.cacheDisabled(null)));
+            ctx.pipeline().addLast(new CommandInboundHandler());
+            ctx.pipeline().remove(ChunkedWriteHandler.class);
+            ctx.pipeline().remove(BigFilesWriteHandler.class);
+            impl.setFileTransactionFinished(true);
+            end = true;
         }
     }
 }

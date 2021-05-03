@@ -16,31 +16,31 @@ public class DownloadFileCommand implements CommandService {
 
     @Override
     public String processCommand(String command, Channel channel) {
-        final int requirementCountCommandParts = 2;
+        final int requirementCountCommandParts = 3;
 
-        String[] actualCommandParts = command.split("\\s", 2);
+        String[] actualCommandParts = command.split("\\s", 3);
         if (actualCommandParts.length != requirementCountCommandParts) {
             throw new IllegalArgumentException("Command \"" + getCommand() + "\" is not correct");
         }
 
-        channelSetForDownloading(channel, actualCommandParts[1]);
+        channelSetForDownloading(channel, actualCommandParts);
 
 
-        return actualCommandParts[1];
+        return actualCommandParts[2];
     }
 
-    private void channelSetForDownloading(Channel channel, String actualCommandPart) {
+    private void channelSetForDownloading(Channel channel, String[] actualCommandParts) {
         try {
-            File File = new File(actualCommandPart);
-            File newFile = new File(Common.CLOUD_DIR + File.separator + File.getName());
+            File File = new File(actualCommandParts[2]);
+            File newFile = new File(Common.CLOUD_DIR + File.separator + actualCommandParts[1] + File.separator + File.getName());
             channel.writeAndFlush(Common.DOWNLOAD + " " + newFile.length() + " " + File);
             channel.pipeline().remove(CommandInboundHandler.class);
             channel.pipeline().addLast(new ChunkedWriteHandler());
             ChannelFuture future = channel.writeAndFlush(new ChunkedFile(newFile));
             future.addListener((ChannelFutureListener) channelFuture -> {
                 System.out.println("Finish download server");
-                future.channel().pipeline().addLast(new CommandInboundHandler());
                 future.channel().pipeline().remove(ChunkedWriteHandler.class);
+                future.channel().pipeline().addLast(new CommandInboundHandler());
             });
         } catch (IOException e) {
             e.printStackTrace();
