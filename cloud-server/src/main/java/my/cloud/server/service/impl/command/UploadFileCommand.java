@@ -29,7 +29,7 @@ public class UploadFileCommand implements CommandService {
         channel.pipeline().remove(CommandInboundHandler.class);
         channel.pipeline().remove(ObjectDecoder.class);
         channel.pipeline().remove(ObjectEncoder.class);
-        channel.pipeline().addLast(new ChunkedWriteHandler());
+//        channel.pipeline().addLast(new ChunkedWriteHandler());
         channel.pipeline().addLast(new BigFilesWriteHandler(file, Long.parseLong(actualCommandParts[2])));
 
         return "";

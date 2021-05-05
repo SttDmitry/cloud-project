@@ -8,6 +8,7 @@ import io.netty.handler.codec.serialization.ObjectDecoder;
 import io.netty.handler.codec.serialization.ObjectEncoder;
 import io.netty.handler.stream.ChunkedNioFile;
 import io.netty.handler.stream.ChunkedWriteHandler;
+import io.netty.util.CharsetUtil;
 import my.cloud.client.service.NetworkService;
 
 import java.io.*;
@@ -32,8 +33,17 @@ public class BigFilesWriteHandler extends SimpleChannelInboundHandler<ByteBuf> {
 
         ByteBuf byteBuf = bb.retain();
 
-        checkWriteEnd(ctx);
+        String str = (String) byteBuf.toString(CharsetUtil.UTF_8);
 
+        if(str.substring(str.length()-4).equals("/end")) {
+            System.out.println("Finish download");
+            ctx.pipeline().remove(BigFilesWriteHandler.class);
+            ctx.pipeline().addLast(new ObjectEncoder());
+            ctx.pipeline().addLast(new ObjectDecoder(150*1024*1024,ClassResolvers.cacheDisabled(null)));
+            ctx.pipeline().addLast(new CommandInboundHandler());
+            end = true;
+        }
+        checkWriteEnd(ctx);
         if (!end){outputFileWrite(ctx,byteBuf);}
 
         byteBuf.release();
@@ -45,7 +55,7 @@ public class BigFilesWriteHandler extends SimpleChannelInboundHandler<ByteBuf> {
             while (byteBuf.isReadable()) {
                 os.write(byteBuf.readByte());
             }
-            System.out.println("fileSpace = " + fileSpace + " , fileToWrite.length() = " + fileToWrite.length());
+            System.out.println(fileToWrite+" "+ fileToWrite.length());
             checkWriteEnd(ctx);
         } catch (IOException ex) {
             ex.printStackTrace();
@@ -53,12 +63,12 @@ public class BigFilesWriteHandler extends SimpleChannelInboundHandler<ByteBuf> {
     }
 
     private void checkWriteEnd(ChannelHandlerContext ctx) {
-        if (!end && (Math.abs(fileSpace - fileToWrite.length()) <= fileSpace / 200 || fileSpace < 1024 && fileSpace+fileToWrite.length()/3 > Math.abs(fileSpace - fileToWrite.length()))) {
+//        if (!end && (Math.abs(fileSpace - fileToWrite.length()) <= fileSpace / 400 || fileSpace < 1024 && fileSpace+fileToWrite.length()/3 > Math.abs(fileSpace - fileToWrite.length()))) {
+          if (!end && fileSpace == fileToWrite.length()) {
             System.out.println("Finish download");
             ctx.pipeline().addLast(new ObjectEncoder());
             ctx.pipeline().addLast(new ObjectDecoder(150*1024*1024,ClassResolvers.cacheDisabled(null)));
             ctx.pipeline().addLast(new CommandInboundHandler());
-            ctx.pipeline().remove(ChunkedWriteHandler.class);
             ctx.pipeline().remove(BigFilesWriteHandler.class);
             impl.setFileTransactionFinished(true);
             end = true;

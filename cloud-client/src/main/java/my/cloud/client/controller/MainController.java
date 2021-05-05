@@ -62,6 +62,7 @@ public class MainController implements Initializable {
             while (!networkService.getFileTransactionFinished()) {
                 waiting();
             }
+            networkService.getChannel().writeAndFlush("/end");
             waitingFinished();
             refreshFilesLists();
         }

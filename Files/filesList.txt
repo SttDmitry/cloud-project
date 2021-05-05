@@ -1,1 +1,1 @@
-.gitignore, copy.gitignore, copycopy.gitignore, copypom.xml, pom.xml
+copypom.xml, MyBullyIsMyLover-Ep.3Bugfixed-pc.zip, pom.xml
