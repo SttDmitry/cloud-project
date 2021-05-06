@@ -1,1 +1,1 @@
-copypom.xml, MyBullyIsMyLover-Ep.3Bugfixed-pc.zip, pom.xml
+MyBullyIsMyLover-Ep.3Bugfixed-pc.zip, pom.xml

@@ -41,6 +41,7 @@ public class DownloadFileCommand implements CommandService {
                 System.out.println("Finish download server");
                 future.channel().pipeline().remove(ChunkedWriteHandler.class);
                 future.channel().pipeline().addLast(new CommandInboundHandler());
+                future.channel().writeAndFlush("/end");
             });
         } catch (IOException e) {
             e.printStackTrace();

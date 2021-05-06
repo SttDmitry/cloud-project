@@ -32,35 +32,29 @@ public class BigFilesWriteHandler extends SimpleChannelInboundHandler<ByteBuf> {
 
         ByteBuf byteBuf = bb.retain();
 
-        String str = (String) byteBuf.toString(CharsetUtil.UTF_8);
+        String str = byteBuf.toString(CharsetUtil.UTF_8);
 
-        if(str.substring(str.length()-4).equals("/end")) {
-            System.out.println("Finish upload server");
-            ctx.pipeline().remove(BigFilesWriteHandler.class);
-            ctx.pipeline().addLast(new ObjectEncoder());
-            ctx.pipeline().addLast(new ObjectDecoder(150*1024*1024,ClassResolvers.cacheDisabled(null)));
-            ctx.pipeline().addLast(new CommandInboundHandler());
-            end = true;
-        }
+        checkWriteEnd(ctx, str);
 
-        if (!end) {outputFileWriter(ctx, byteBuf);}
+        if (!end) {outputFileWriter(ctx, byteBuf, str);}
 
         byteBuf.release();
 
     }
 
-    private void outputFileWriter(ChannelHandlerContext ctx, ByteBuf byteBuf) {
+    private void outputFileWriter(ChannelHandlerContext ctx, ByteBuf byteBuf, String str) {
         try (OutputStream os = new BufferedOutputStream(new FileOutputStream(fileToWrite, true))) {
             while (byteBuf.isReadable()) {
                 os.write(byteBuf.readByte());
             }
+            checkWriteEnd(ctx, str);
         } catch (Exception ex) {
             ex.printStackTrace();
         }
     }
 
-    private void checkWriteEnd(ChannelHandlerContext ctx) {
-        if (!end && (Math.abs(fileSpace - fileToWrite.length()) <= fileSpace / 200 || fileSpace < 1024 && fileSpace+fileToWrite.length()/3 > Math.abs(fileSpace - fileToWrite.length()))) {
+    private void checkWriteEnd(ChannelHandlerContext ctx, String str) {
+        if(!end && str.contains("/end")) {
             System.out.println("Finish upload server");
             ctx.pipeline().remove(BigFilesWriteHandler.class);
             ctx.pipeline().addLast(new ObjectEncoder());
