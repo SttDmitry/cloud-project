@@ -5,7 +5,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 
-public class AuthController{
+public class AuthController {
     @FXML
     private Label error;
     @FXML

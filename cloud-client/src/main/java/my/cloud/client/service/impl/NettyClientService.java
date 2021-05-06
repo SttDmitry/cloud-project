@@ -29,7 +29,8 @@ public class NettyClientService implements NetworkService {
         return instance;
     }
 
-    NettyClientService(){}
+    NettyClientService() {
+    }
 
     private SocketChannel channel;
 

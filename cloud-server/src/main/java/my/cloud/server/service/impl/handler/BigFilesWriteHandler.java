@@ -6,7 +6,6 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.serialization.ClassResolvers;
 import io.netty.handler.codec.serialization.ObjectDecoder;
 import io.netty.handler.codec.serialization.ObjectEncoder;
-import io.netty.handler.stream.ChunkedWriteHandler;
 import io.netty.util.CharsetUtil;
 
 import java.io.BufferedOutputStream;
@@ -36,7 +35,9 @@ public class BigFilesWriteHandler extends SimpleChannelInboundHandler<ByteBuf> {
 
         checkWriteEnd(ctx, str);
 
-        if (!end) {outputFileWriter(ctx, byteBuf, str);}
+        if (!end) {
+            outputFileWriter(ctx, byteBuf, str);
+        }
 
         byteBuf.release();
 
@@ -47,6 +48,7 @@ public class BigFilesWriteHandler extends SimpleChannelInboundHandler<ByteBuf> {
             while (byteBuf.isReadable()) {
                 os.write(byteBuf.readByte());
             }
+            System.out.println(fileToWrite + " " + fileToWrite.length() + " out of " + fileSpace);
             checkWriteEnd(ctx, str);
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -54,11 +56,11 @@ public class BigFilesWriteHandler extends SimpleChannelInboundHandler<ByteBuf> {
     }
 
     private void checkWriteEnd(ChannelHandlerContext ctx, String str) {
-        if(!end && str.contains("/end")) {
+        if (!end && str.contains("/end")) {
             System.out.println("Finish upload server");
             ctx.pipeline().remove(BigFilesWriteHandler.class);
             ctx.pipeline().addLast(new ObjectEncoder());
-            ctx.pipeline().addLast(new ObjectDecoder(150*1024*1024,ClassResolvers.cacheDisabled(null)));
+            ctx.pipeline().addLast(new ObjectDecoder(150 * 1024 * 1024, ClassResolvers.cacheDisabled(null)));
             ctx.pipeline().addLast(new CommandInboundHandler());
             end = true;
         }

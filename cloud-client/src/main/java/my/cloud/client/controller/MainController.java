@@ -94,9 +94,7 @@ public class MainController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        Platform.runLater(() -> {
-            stage = (Stage) localPath.getScene().getWindow();
-        });
+        Platform.runLater(() -> stage = (Stage) localPath.getScene().getWindow());
         networkService = Factory.getNetworkService();
         networkService.start();
         Platform.runLater(() -> {

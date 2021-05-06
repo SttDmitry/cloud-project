@@ -21,7 +21,7 @@ public class ViewFilesInDirCommand implements CommandService {
             file.getParentFile().mkdirs();
             fileCreate(file);
         }
-        if (actualCommandParts.length>1) {
+        if (actualCommandParts.length > 1) {
             listToFileWriter(actualCommandParts[1], file);
         } else {
             listToFileWriter("", file);

@@ -3,7 +3,6 @@ package my.cloud.server.service.impl.command;
 import io.netty.channel.Channel;
 import io.netty.handler.codec.serialization.ObjectDecoder;
 import io.netty.handler.codec.serialization.ObjectEncoder;
-import io.netty.handler.stream.ChunkedWriteHandler;
 import my.cloud.common.Common;
 import my.cloud.server.service.CommandService;
 import my.cloud.server.service.impl.handler.BigFilesWriteHandler;
@@ -21,7 +20,7 @@ public class UploadFileCommand implements CommandService {
         if (actualCommandParts.length != requirementCountCommandParts) {
             throw new IllegalArgumentException("Command \"" + getCommand() + "\" is not correct");
         }
-        File file = new File (Common.CLOUD_DIR + File.separator + actualCommandParts[1] + File.separator + actualCommandParts[3]);
+        File file = new File(Common.CLOUD_DIR + File.separator + actualCommandParts[1] + File.separator + actualCommandParts[3]);
         while (file.exists()) {
             file = new File(Common.CLOUD_DIR + File.separator + actualCommandParts[1] + File.separator + "copy" + file.getName());
         }
@@ -29,7 +28,6 @@ public class UploadFileCommand implements CommandService {
         channel.pipeline().remove(CommandInboundHandler.class);
         channel.pipeline().remove(ObjectDecoder.class);
         channel.pipeline().remove(ObjectEncoder.class);
-//        channel.pipeline().addLast(new ChunkedWriteHandler());
         channel.pipeline().addLast(new BigFilesWriteHandler(file, Long.parseLong(actualCommandParts[2])));
 
         return "";

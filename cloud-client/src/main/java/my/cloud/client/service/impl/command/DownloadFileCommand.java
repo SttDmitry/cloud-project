@@ -13,7 +13,7 @@ import java.io.File;
 
 public class DownloadFileCommand implements CommandService {
 
-    private NetworkService impl;
+    private final NetworkService impl;
 
     public DownloadFileCommand(NetworkService impl) {
         this.impl = impl;
@@ -27,7 +27,7 @@ public class DownloadFileCommand implements CommandService {
         if (actualCommandParts.length != requirementCountCommandParts) {
             throw new IllegalArgumentException("Command \"" + getCommand() + "\" is not correct");
         }
-        File file = new File (actualCommandParts[2]);
+        File file = new File(actualCommandParts[2]);
         while (file.exists()) {
             file = new File(Common.LOCAL_DIR + File.separator + "copy" + file.getName());
         }

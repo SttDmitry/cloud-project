@@ -15,7 +15,7 @@ public class ViewFilesInDirCommand implements CommandService {
     public String processCommand(String command, Channel channel) {
         final int requirementCountCommandParts = 2;
         String[] actualCommandParts = command.split("\\s");
-        cloudDir = new File(Common.CLOUD_DIR+File.separator+actualCommandParts[1]);
+        cloudDir = new File(Common.CLOUD_DIR + File.separator + actualCommandParts[1]);
         if (actualCommandParts.length != requirementCountCommandParts) {
             throw new IllegalArgumentException("Command \"" + getCommand() + "\" is not correct");
         }
@@ -34,7 +34,7 @@ public class ViewFilesInDirCommand implements CommandService {
                 }
             }
         }
-        if (sb.length()>1) {
+        if (sb.length() > 1) {
             sb.setLength(sb.length() - 2);
         }
 

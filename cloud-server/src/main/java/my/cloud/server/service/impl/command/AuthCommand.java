@@ -8,9 +8,6 @@ import java.sql.*;
 
 public class AuthCommand implements CommandService {
 
-    private static Connection connection;
-    private static PreparedStatement prepStmt;
-
     private static final String url = "jdbc:postgresql://localhost:5435/cloud";
     private static final String user = "postgres";
     private static final String pass = "postgrespass";
@@ -25,17 +22,19 @@ public class AuthCommand implements CommandService {
         }
 
         try {
-            connection = DriverManager.getConnection(url, user, pass);
+            Connection connection = DriverManager.getConnection(url, user, pass);
             System.out.println("Successfully connected");
-            prepStmt = connection.prepareStatement("SELECT login, password, username FROM auth_data WHERE login = ? AND password = ? ;");
+            PreparedStatement prepStmt = connection.prepareStatement("SELECT login, password, username FROM auth_data WHERE login = ? AND password = ? ;");
             prepStmt.setString(1, actualCommandParts[1]);
             prepStmt.setString(2, actualCommandParts[2]);
             ResultSet rs = prepStmt.executeQuery();
             while (rs.next()) {
-                return Common.AUTH_SUCCESS+" "+rs.getString("username");
+                prepStmt.close();
+                connection.close();
+                return Common.AUTH_SUCCESS + " " + rs.getString("username");
             }
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
+        } catch (SQLException throwable) {
+            throwable.printStackTrace();
         }
         return Common.AUTH_FAIL.toString();
     }

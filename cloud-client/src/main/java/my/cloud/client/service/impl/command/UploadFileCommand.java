@@ -18,7 +18,7 @@ import java.io.IOException;
 
 public class UploadFileCommand implements CommandService {
 
-    private NetworkService impl;
+    private final NetworkService impl;
 
     public UploadFileCommand(NetworkService impl) {
         this.impl = impl;
@@ -48,7 +48,7 @@ public class UploadFileCommand implements CommandService {
                 System.out.println("Finish upload");
                 channel.pipeline().remove(ChunkedWriteHandler.class);
                 channel.pipeline().addLast(new ObjectEncoder());
-                channel.pipeline().addLast(new ObjectDecoder(150*1024*1024, ClassResolvers.cacheDisabled(null)));
+                channel.pipeline().addLast(new ObjectDecoder(150 * 1024 * 1024, ClassResolvers.cacheDisabled(null)));
                 channel.pipeline().addLast(new CommandInboundHandler());
                 impl.setFileTransactionFinished(true);
             });

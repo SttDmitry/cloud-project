@@ -6,8 +6,6 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.serialization.ClassResolvers;
 import io.netty.handler.codec.serialization.ObjectDecoder;
 import io.netty.handler.codec.serialization.ObjectEncoder;
-import io.netty.handler.stream.ChunkedNioFile;
-import io.netty.handler.stream.ChunkedWriteHandler;
 import io.netty.util.CharsetUtil;
 import my.cloud.client.service.NetworkService;
 
@@ -29,15 +27,17 @@ public class BigFilesWriteHandler extends SimpleChannelInboundHandler<ByteBuf> {
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, ByteBuf bb) {
-        System.out.println(fileToWrite+" "+ fileToWrite.length());
+        System.out.println(fileToWrite + " " + fileToWrite.length());
 
         ByteBuf byteBuf = bb.retain();
 
         String str = byteBuf.toString(CharsetUtil.UTF_8);
 
-        checkWriteEnd(ctx, str);
+//        checkWriteEnd(ctx, str);
 
-        if (!end){outputFileWrite(ctx,byteBuf, str);}
+        if (!end) {
+            outputFileWrite(ctx, byteBuf, str);
+        }
 
         byteBuf.release();
 
@@ -48,7 +48,7 @@ public class BigFilesWriteHandler extends SimpleChannelInboundHandler<ByteBuf> {
             while (byteBuf.isReadable()) {
                 os.write(byteBuf.readByte());
             }
-            System.out.println(fileToWrite+" "+ fileToWrite.length());
+            System.out.println(fileToWrite + " " + fileToWrite.length() + " out of " + fileSpace);
             checkWriteEnd(ctx, str);
         } catch (IOException ex) {
             ex.printStackTrace();
@@ -56,11 +56,11 @@ public class BigFilesWriteHandler extends SimpleChannelInboundHandler<ByteBuf> {
     }
 
     private void checkWriteEnd(ChannelHandlerContext ctx, String str) {
-        if(!end && str.contains("/end")) {
+        if (!end && str.contains("/end")) {
             System.out.println("Finish download");
             ctx.pipeline().remove(BigFilesWriteHandler.class);
             ctx.pipeline().addLast(new ObjectEncoder());
-            ctx.pipeline().addLast(new ObjectDecoder(150*1024*1024,ClassResolvers.cacheDisabled(null)));
+            ctx.pipeline().addLast(new ObjectDecoder(150 * 1024 * 1024, ClassResolvers.cacheDisabled(null)));
             ctx.pipeline().addLast(new CommandInboundHandler());
             impl.setFileTransactionFinished(true);
             end = true;
