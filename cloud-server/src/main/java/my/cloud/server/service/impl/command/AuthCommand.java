@@ -29,7 +29,6 @@ public class AuthCommand implements CommandService {
             prepStmt.setString(2, actualCommandParts[2]);
             ResultSet rs = prepStmt.executeQuery();
             while (rs.next()) {
-                prepStmt.close();
                 connection.close();
                 return Common.AUTH_SUCCESS + " " + rs.getString("username");
             }
