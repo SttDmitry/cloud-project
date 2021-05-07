@@ -99,6 +99,7 @@ public class MainController implements Initializable {
         networkService.start();
         Platform.runLater(() -> {
             createLoginWindow();
+            stage.hide();
             authStage.show();
         });
         long mil = System.currentTimeMillis();
@@ -175,11 +176,11 @@ public class MainController implements Initializable {
             authStage = new Stage();
             authStage.setTitle("Log in");
             authStage.setScene(new Scene(root, 300, 210));
+            authStage.setResizable(false);
             authController = fxmlLoader.getController();
             authController.setController(this);
             authStage.initModality(Modality.APPLICATION_MODAL);
             authStage.initStyle(StageStyle.UTILITY);
-            stage.hide();
         } catch (IOException e) {
             e.printStackTrace();
         }

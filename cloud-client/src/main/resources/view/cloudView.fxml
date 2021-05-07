@@ -3,12 +3,12 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="my.cloud.client.controller.MainController">
+<AnchorPane prefHeight="400.0" prefWidth="600.0" stylesheets="@../css/style.css" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="my.cloud.client.controller.MainController">
    <children>
-      <TextField fx:id="localPath" editable="false" layoutX="14.0" layoutY="14.0" prefHeight="25.0" prefWidth="265.0" text="C:\\..." AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="10.0" />
-      <TextField fx:id="cloudPath" editable="false" layoutX="321.0" layoutY="14.0" prefHeight="25.0" prefWidth="265.0" text="User:\\..." AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="10.0" />
-      <ListView fx:id="localFilesList" editable="true" layoutX="10.0" layoutY="48.0" onMouseClicked="#localClick" prefHeight="307.0" prefWidth="265.0" AnchorPane.leftAnchor="10.0" />
-      <ListView fx:id="cloudFilesList" editable="true" layoutX="325.0" layoutY="48.0" onMouseClicked="#cloudClick" prefHeight="307.0" prefWidth="265.0" AnchorPane.rightAnchor="10.0" />
+      <TextField fx:id="localPath" editable="false" layoutX="14.0" layoutY="14.0" prefHeight="25.0" prefWidth="265.0" styleClass="text-field" text="C:\\..." AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="10.0" />
+      <TextField fx:id="cloudPath" editable="false" layoutX="321.0" layoutY="14.0" prefHeight="25.0" prefWidth="265.0" styleClass="text-field" text="User:\\..." AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="10.0" />
+      <ListView fx:id="localFilesList" editable="true" layoutX="10.0" layoutY="48.0" onMouseClicked="#localClick" prefHeight="307.0" prefWidth="265.0" styleClass="text-field" AnchorPane.leftAnchor="10.0" />
+      <ListView fx:id="cloudFilesList" editable="true" layoutX="325.0" layoutY="48.0" onMouseClicked="#cloudClick" prefHeight="307.0" prefWidth="265.0" styleClass="text-field" AnchorPane.rightAnchor="10.0" />
       <Button fx:id="uplButton" layoutX="108.0" layoutY="361.0" mnemonicParsing="false" onAction="#uploadFile" text="Upload" />
       <Button fx:id="downButton" layoutX="422.0" layoutY="361.0" mnemonicParsing="false" onAction="#downloadFile" text="Download" />
       <Button layoutX="275.0" layoutY="361.0" mnemonicParsing="false" text="Delete" visible="false" />

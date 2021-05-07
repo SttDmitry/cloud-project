@@ -3,11 +3,11 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane prefHeight="207.0" prefWidth="294.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="my.cloud.client.controller.AuthController">
+<AnchorPane prefHeight="207.0" prefWidth="294.0" stylesheets="@../css/style.css" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="my.cloud.client.controller.AuthController">
    <children>
       <TextField fx:id="loginField" layoutX="85.0" layoutY="37.0" promptText="Your login.." />
-      <Button layoutX="123.0" layoutY="146.0" mnemonicParsing="false" onAction="#tryToAuth" text="Log in" />
-      <Label layoutX="28.0" layoutY="41.0" prefHeight="17.0" prefWidth="28.0" text="login" />
+      <Button layoutX="123.0" layoutY="146.0" mnemonicParsing="false" onAction="#tryToAuth" text="log in" />
+      <Label layoutX="28.0" layoutY="41.0" prefHeight="17.0" prefWidth="38.0" text="login" />
       <Label layoutX="28.0" layoutY="88.0" text="password" />
       <Label fx:id="error" layoutX="19.0" layoutY="122.0" text="Both fields &quot;login&quot; and &quot;password&quot; must be filled" textFill="RED" visible="false" />
       <PasswordField fx:id="passField" layoutX="85.0" layoutY="84.0" promptText="Your password.." />
