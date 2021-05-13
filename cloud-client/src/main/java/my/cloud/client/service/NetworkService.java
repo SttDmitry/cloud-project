@@ -13,4 +13,8 @@ public interface NetworkService {
     void setFileTransactionFinished(boolean isFinished);
 
     boolean getFileTransactionFinished();
+
+    String getAuthResult();
+
+    void setAuthResult(String str);
 }

@@ -3,7 +3,6 @@ package my.cloud.client.service.impl.command;
 import io.netty.channel.Channel;
 import io.netty.handler.codec.serialization.ObjectDecoder;
 import io.netty.handler.codec.serialization.ObjectEncoder;
-import io.netty.handler.stream.ChunkedWriteHandler;
 import my.cloud.client.service.CommandService;
 import my.cloud.client.service.NetworkService;
 import my.cloud.client.service.impl.handler.BigFilesWriteHandler;
@@ -14,7 +13,7 @@ import java.io.File;
 
 public class DownloadFileCommand implements CommandService {
 
-    private NetworkService impl;
+    private final NetworkService impl;
 
     public DownloadFileCommand(NetworkService impl) {
         this.impl = impl;
@@ -28,14 +27,13 @@ public class DownloadFileCommand implements CommandService {
         if (actualCommandParts.length != requirementCountCommandParts) {
             throw new IllegalArgumentException("Command \"" + getCommand() + "\" is not correct");
         }
-        File file = new File (actualCommandParts[2]);
+        File file = new File(actualCommandParts[2]);
         while (file.exists()) {
             file = new File(Common.LOCAL_DIR + File.separator + "copy" + file.getName());
         }
         channel.pipeline().remove(CommandInboundHandler.class);
         channel.pipeline().remove(ObjectDecoder.class);
         channel.pipeline().remove(ObjectEncoder.class);
-        channel.pipeline().addLast(new ChunkedWriteHandler());
         channel.pipeline().addLast(new BigFilesWriteHandler(file, Long.parseLong(actualCommandParts[1]), impl));
 
         return actualCommandParts[1];

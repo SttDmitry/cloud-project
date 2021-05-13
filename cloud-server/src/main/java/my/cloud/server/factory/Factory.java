@@ -5,6 +5,7 @@ import my.cloud.server.service.CommandService;
 import my.cloud.server.service.ServerService;
 import my.cloud.server.service.impl.CommandDictionaryServiceImpl;
 import my.cloud.server.service.impl.NettyServerService;
+import my.cloud.server.service.impl.command.AuthCommand;
 import my.cloud.server.service.impl.command.DownloadFileCommand;
 import my.cloud.server.service.impl.command.UploadFileCommand;
 import my.cloud.server.service.impl.command.ViewFilesInDirCommand;
@@ -23,6 +24,6 @@ public class Factory {
     }
 
     public static List<CommandService> getCommandServices() {
-        return Arrays.asList(new ViewFilesInDirCommand(), new DownloadFileCommand(), new UploadFileCommand());
+        return Arrays.asList(new ViewFilesInDirCommand(), new DownloadFileCommand(), new UploadFileCommand(), new AuthCommand());
     }
 }

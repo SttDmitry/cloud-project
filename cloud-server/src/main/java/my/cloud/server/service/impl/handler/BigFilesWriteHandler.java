@@ -6,8 +6,7 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.serialization.ClassResolvers;
 import io.netty.handler.codec.serialization.ObjectDecoder;
 import io.netty.handler.codec.serialization.ObjectEncoder;
-import io.netty.handler.stream.ChunkedWriteHandler;
-import my.cloud.common.Common;
+import io.netty.util.CharsetUtil;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -18,6 +17,7 @@ public class BigFilesWriteHandler extends SimpleChannelInboundHandler<ByteBuf> {
 
     private final File fileToWrite;
     private final long fileSpace;
+    private static boolean end = false;
 
     public BigFilesWriteHandler(File ftw, long l) {
         this.fileToWrite = ftw;
@@ -31,28 +31,38 @@ public class BigFilesWriteHandler extends SimpleChannelInboundHandler<ByteBuf> {
 
         ByteBuf byteBuf = bb.retain();
 
-        outputFileWriter(ctx, byteBuf);
+        String str = byteBuf.toString(CharsetUtil.UTF_8);
+
+        checkWriteEnd(ctx, str);
+
+        if (!end) {
+            outputFileWriter(ctx, byteBuf, str);
+        }
 
         byteBuf.release();
 
     }
 
-    private void outputFileWriter(ChannelHandlerContext ctx, ByteBuf byteBuf) {
+    private void outputFileWriter(ChannelHandlerContext ctx, ByteBuf byteBuf, String str) {
         try (OutputStream os = new BufferedOutputStream(new FileOutputStream(fileToWrite, true))) {
             while (byteBuf.isReadable()) {
                 os.write(byteBuf.readByte());
             }
-            System.out.println("fileSpace = " + fileSpace + " , fileToWrite.length() = " + fileToWrite.length());
-            if (Math.abs(fileSpace - fileToWrite.length()) <= fileSpace / 200) {
-                System.out.println("Finish upload");
-                ctx.pipeline().addLast(new ObjectEncoder());
-                ctx.pipeline().addLast(new ObjectDecoder(150*1024*1024,ClassResolvers.cacheDisabled(null)));
-                ctx.pipeline().addLast(new CommandInboundHandler());
-                ctx.pipeline().remove(BigFilesWriteHandler.class);
-                ctx.pipeline().remove(ChunkedWriteHandler.class);
-            }
+            System.out.println(fileToWrite + " " + fileToWrite.length() + " out of " + fileSpace);
+            checkWriteEnd(ctx, str);
         } catch (Exception ex) {
             ex.printStackTrace();
+        }
+    }
+
+    private void checkWriteEnd(ChannelHandlerContext ctx, String str) {
+        if (!end && str.contains("/end")) {
+            System.out.println("Finish upload server");
+            ctx.pipeline().remove(BigFilesWriteHandler.class);
+            ctx.pipeline().addLast(new ObjectEncoder());
+            ctx.pipeline().addLast(new ObjectDecoder(150 * 1024 * 1024, ClassResolvers.cacheDisabled(null)));
+            ctx.pipeline().addLast(new CommandInboundHandler());
+            end = true;
         }
     }
 }

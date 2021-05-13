@@ -10,10 +10,10 @@ public class ViewFilesInDirCommand implements CommandService {
 
     @Override
     public String processCommand(String command, Channel channel) {
-        final int requirementCountCommandParts = 2;
+        final int requirementCountCommandParts = 1;
 
         String[] actualCommandParts = command.split("\\s", 2);
-        if (actualCommandParts.length != requirementCountCommandParts) {
+        if (actualCommandParts.length < requirementCountCommandParts) {
             throw new IllegalArgumentException("Command \"" + getCommand() + "\" is not correct");
         }
         File file = new File(Common.FILES_LIST.toString());
@@ -21,8 +21,12 @@ public class ViewFilesInDirCommand implements CommandService {
             file.getParentFile().mkdirs();
             fileCreate(file);
         }
+        if (actualCommandParts.length > 1) {
+            listToFileWriter(actualCommandParts[1], file);
+        } else {
+            listToFileWriter("", file);
+        }
 
-        listToFileWriter(actualCommandParts[1], file);
 
         return actualCommandParts[1];
     }

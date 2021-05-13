@@ -5,6 +5,7 @@ import my.cloud.client.service.CommandService;
 import my.cloud.client.service.NetworkService;
 import my.cloud.client.service.impl.CommandDictionaryServiceImpl;
 import my.cloud.client.service.impl.NettyClientService;
+import my.cloud.client.service.impl.command.AuthCommand;
 import my.cloud.client.service.impl.command.DownloadFileCommand;
 import my.cloud.client.service.impl.command.UploadFileCommand;
 import my.cloud.client.service.impl.command.ViewFilesInDirCommand;
@@ -23,7 +24,7 @@ public class Factory {
     }
 
     public static List<CommandService> getCommandServices() {
-        return Arrays.asList(new ViewFilesInDirCommand(), new DownloadFileCommand(getNetworkService()), new UploadFileCommand(getNetworkService()));
+        return Arrays.asList(new ViewFilesInDirCommand(), new DownloadFileCommand(getNetworkService()), new UploadFileCommand(getNetworkService()), new AuthCommand(getNetworkService()));
     }
 
 }

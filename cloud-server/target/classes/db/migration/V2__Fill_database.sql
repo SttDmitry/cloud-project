@@ -1,0 +1,1 @@
+INSERT INTO auth_data (login, password, username) VALUES ('user', 'password', 'user1');
